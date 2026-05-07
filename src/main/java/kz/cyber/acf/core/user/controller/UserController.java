@@ -8,8 +8,10 @@ import kz.cyber.acf.core.user.dto.UpdateUserRequest;
 import kz.cyber.acf.core.user.dto.UserDto;
 import kz.cyber.acf.core.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -52,6 +54,21 @@ public class UserController {
             @Parameter(description = "User ID") @PathVariable Long id,
             @RequestBody UpdateUserRequest req) {
         return userService.update(id, req);
+    }
+
+    @Operation(
+            summary = "Upload profile photo",
+            description = "Uploads a photo to MinIO and saves the reference. Returns the updated user with a presigned photo URL.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Photo uploaded"),
+                    @ApiResponse(responseCode = "404", description = "User not found")
+            }
+    )
+    @PostMapping(value = "/{id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public UserDto uploadPhoto(
+            @Parameter(description = "User ID") @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        return userService.uploadPhoto(id, file);
     }
 
     @Operation(

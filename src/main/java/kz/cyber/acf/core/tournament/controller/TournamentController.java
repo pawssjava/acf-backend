@@ -9,8 +9,10 @@ import kz.cyber.acf.core.tournament.dto.TournamentRequest;
 import kz.cyber.acf.core.tournament.service.TournamentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -64,6 +66,21 @@ public class TournamentController {
             @Parameter(description = "Tournament ID") @PathVariable Long id,
             @RequestBody TournamentRequest req) {
         return tournamentService.update(id, req);
+    }
+
+    @Operation(
+            summary = "Upload tournament logo",
+            description = "Uploads a logo image to MinIO and attaches it to the tournament.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Logo uploaded"),
+                    @ApiResponse(responseCode = "404", description = "Tournament not found")
+            }
+    )
+    @PostMapping(value = "/{id}/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public TournamentDto uploadLogo(
+            @Parameter(description = "Tournament ID") @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        return tournamentService.uploadLogo(id, file);
     }
 
     @Operation(

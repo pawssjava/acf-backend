@@ -8,7 +8,6 @@ import java.time.LocalDate;
 @Data
 public class TournamentRequest {
     private String name;
-    private String logo;
     private LocalDate startDate;
     private Integer capacity;
     private BigDecimal prizeMoney;

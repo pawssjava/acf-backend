@@ -2,10 +2,12 @@ package kz.cyber.acf.core.tournament.service;
 
 import kz.cyber.acf.core.tournament.dto.TournamentDto;
 import kz.cyber.acf.core.tournament.dto.TournamentRequest;
+import kz.cyber.acf.storage.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
@@ -17,7 +19,10 @@ import static group.bi.postsales.database.Tables.*;
 @RequiredArgsConstructor
 public class TournamentService {
 
+    private static final String BUCKET = "tournaments";
+
     private final DefaultDSLContext dsl;
+    private final MinioService minioService;
 
     public List<TournamentDto> findAll() {
         return dsl.select(
@@ -41,7 +46,7 @@ public class TournamentService {
                 .fetch(r -> new TournamentDto(
                         r.get(TOURNAMENT.ID),
                         r.get(TOURNAMENT.NAME),
-                        r.get(TOURNAMENT.LOGO),
+                        resolveUrl(r.get(TOURNAMENT.LOGO)),
                         r.get(TOURNAMENT.START_DATE),
                         r.get(TOURNAMENT.CAPACITY),
                         r.get(TOURNAMENT.PRIZE_MONEY),
@@ -76,7 +81,7 @@ public class TournamentService {
                 .fetchOptional(r -> new TournamentDto(
                         r.get(TOURNAMENT.ID),
                         r.get(TOURNAMENT.NAME),
-                        r.get(TOURNAMENT.LOGO),
+                        resolveUrl(r.get(TOURNAMENT.LOGO)),
                         r.get(TOURNAMENT.START_DATE),
                         r.get(TOURNAMENT.CAPACITY),
                         r.get(TOURNAMENT.PRIZE_MONEY),
@@ -93,7 +98,6 @@ public class TournamentService {
     public TournamentDto create(TournamentRequest req) {
         Long id = dsl.insertInto(TOURNAMENT)
                 .set(TOURNAMENT.NAME, req.getName())
-                .set(TOURNAMENT.LOGO, req.getLogo())
                 .set(TOURNAMENT.START_DATE, req.getStartDate())
                 .set(TOURNAMENT.CAPACITY, req.getCapacity())
                 .set(TOURNAMENT.PRIZE_MONEY, req.getPrizeMoney())
@@ -109,7 +113,6 @@ public class TournamentService {
     public TournamentDto update(Long id, TournamentRequest req) {
         int updated = dsl.update(TOURNAMENT)
                 .set(TOURNAMENT.NAME, req.getName())
-                .set(TOURNAMENT.LOGO, req.getLogo())
                 .set(TOURNAMENT.START_DATE, req.getStartDate())
                 .set(TOURNAMENT.CAPACITY, req.getCapacity())
                 .set(TOURNAMENT.PRIZE_MONEY, req.getPrizeMoney())
@@ -124,10 +127,26 @@ public class TournamentService {
         return findById(id);
     }
 
+    public TournamentDto uploadLogo(Long id, MultipartFile file) {
+        findById(id);
+        String objectName = minioService.upload(BUCKET, file);
+        dsl.update(TOURNAMENT)
+                .set(TOURNAMENT.LOGO, objectName)
+                .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now())
+                .where(TOURNAMENT.ID.eq(id))
+                .execute();
+        return findById(id);
+    }
+
     public void delete(Long id) {
         int deleted = dsl.deleteFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(id)).execute();
         if (deleted == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
         }
+    }
+
+    private String resolveUrl(String objectName) {
+        if (objectName == null || objectName.startsWith("http")) return objectName;
+        return minioService.presignedUrl(BUCKET, objectName, 24);
     }
 }

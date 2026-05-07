@@ -2,10 +2,12 @@ package kz.cyber.acf.core.user.service;
 
 import kz.cyber.acf.core.user.dto.UpdateUserRequest;
 import kz.cyber.acf.core.user.dto.UserDto;
+import kz.cyber.acf.storage.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
@@ -17,13 +19,16 @@ import static group.bi.postsales.database.Tables.USER;
 @RequiredArgsConstructor
 public class UserService {
 
+    private static final String BUCKET = "users";
+
     private final DefaultDSLContext dsl;
+    private final MinioService minioService;
 
     public List<UserDto> findAll() {
         return dsl.selectFrom(USER).fetch(r -> new UserDto(
                 r.getId(), r.getUsername(), r.getPhoneNumber(),
                 r.getFirstName(), r.getLastName(), r.getBirthDate(),
-                r.getIsAdmin(), r.getPhoto(), r.getCreatedDate(), r.getUpdatedDate()
+                r.getIsAdmin(), resolveUrl(r.getPhoto()), r.getCreatedDate(), r.getUpdatedDate()
         ));
     }
 
@@ -34,7 +39,7 @@ public class UserService {
                 .map(r -> new UserDto(
                         r.getId(), r.getUsername(), r.getPhoneNumber(),
                         r.getFirstName(), r.getLastName(), r.getBirthDate(),
-                        r.getIsAdmin(), r.getPhoto(), r.getCreatedDate(), r.getUpdatedDate()
+                        r.getIsAdmin(), resolveUrl(r.getPhoto()), r.getCreatedDate(), r.getUpdatedDate()
                 ))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
@@ -44,7 +49,6 @@ public class UserService {
                 .set(USER.FIRST_NAME, req.getFirstName())
                 .set(USER.LAST_NAME, req.getLastName())
                 .set(USER.BIRTH_DATE, req.getBirthDate())
-                .set(USER.PHOTO, req.getPhoto())
                 .set(USER.UPDATED_DATE, OffsetDateTime.now())
                 .where(USER.ID.eq(id))
                 .execute();
@@ -54,10 +58,26 @@ public class UserService {
         return findById(id);
     }
 
+    public UserDto uploadPhoto(Long id, MultipartFile file) {
+        findById(id);
+        String objectName = minioService.upload(BUCKET, file);
+        dsl.update(USER)
+                .set(USER.PHOTO, objectName)
+                .set(USER.UPDATED_DATE, OffsetDateTime.now())
+                .where(USER.ID.eq(id))
+                .execute();
+        return findById(id);
+    }
+
     public void delete(Long id) {
         int deleted = dsl.deleteFrom(USER).where(USER.ID.eq(id)).execute();
         if (deleted == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
+    }
+
+    private String resolveUrl(String objectName) {
+        if (objectName == null || objectName.startsWith("http")) return objectName;
+        return minioService.presignedUrl(BUCKET, objectName, 24);
     }
 }

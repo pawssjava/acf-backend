@@ -9,8 +9,10 @@ import kz.cyber.acf.core.news.dto.NewsRequest;
 import kz.cyber.acf.core.news.service.NewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -63,6 +65,21 @@ public class NewsController {
             @Parameter(description = "News article ID") @PathVariable Long id,
             @RequestBody NewsRequest req) {
         return newsService.update(id, req);
+    }
+
+    @Operation(
+            summary = "Upload news image",
+            description = "Uploads an image to MinIO and attaches it to the news article.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Image uploaded"),
+                    @ApiResponse(responseCode = "404", description = "Article not found")
+            }
+    )
+    @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public NewsDto uploadImage(
+            @Parameter(description = "News article ID") @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        return newsService.uploadImage(id, file);
     }
 
     @Operation(

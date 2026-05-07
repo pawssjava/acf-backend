@@ -2,10 +2,12 @@ package kz.cyber.acf.core.news.service;
 
 import kz.cyber.acf.core.news.dto.NewsDto;
 import kz.cyber.acf.core.news.dto.NewsRequest;
+import kz.cyber.acf.storage.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
@@ -17,19 +19,22 @@ import static group.bi.postsales.database.Tables.NEWS;
 @RequiredArgsConstructor
 public class NewsService {
 
+    private static final String BUCKET = "news";
+
     private final DefaultDSLContext dsl;
+    private final MinioService minioService;
 
     public List<NewsDto> findAll() {
         return dsl.selectFrom(NEWS)
                 .orderBy(NEWS.CREATED_DATE.desc())
-                .fetch(r -> new NewsDto(r.getId(), r.getTitle(), r.getDescription(), r.getImage(), r.getCreatedDate(), r.getUpdatedDate()));
+                .fetch(r -> new NewsDto(r.getId(), r.getTitle(), r.getDescription(), resolveUrl(r.getImage()), r.getCreatedDate(), r.getUpdatedDate()));
     }
 
     public NewsDto findById(Long id) {
         return dsl.selectFrom(NEWS)
                 .where(NEWS.ID.eq(id))
                 .fetchOptional()
-                .map(r -> new NewsDto(r.getId(), r.getTitle(), r.getDescription(), r.getImage(), r.getCreatedDate(), r.getUpdatedDate()))
+                .map(r -> new NewsDto(r.getId(), r.getTitle(), r.getDescription(), resolveUrl(r.getImage()), r.getCreatedDate(), r.getUpdatedDate()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found"));
     }
 
@@ -41,7 +46,7 @@ public class NewsService {
                 .set(NEWS.UPDATED_DATE, OffsetDateTime.now())
                 .returning()
                 .fetchOne();
-        return new NewsDto(record.getId(), record.getTitle(), record.getDescription(), record.getImage(), record.getCreatedDate(), record.getUpdatedDate());
+        return new NewsDto(record.getId(), record.getTitle(), record.getDescription(), resolveUrl(record.getImage()), record.getCreatedDate(), record.getUpdatedDate());
     }
 
     public NewsDto update(Long id, NewsRequest req) {
@@ -57,10 +62,26 @@ public class NewsService {
         return findById(id);
     }
 
+    public NewsDto uploadImage(Long id, MultipartFile file) {
+        findById(id);
+        String objectName = minioService.upload(BUCKET, file);
+        dsl.update(NEWS)
+                .set(NEWS.IMAGE, objectName)
+                .set(NEWS.UPDATED_DATE, OffsetDateTime.now())
+                .where(NEWS.ID.eq(id))
+                .execute();
+        return findById(id);
+    }
+
     public void delete(Long id) {
         int deleted = dsl.deleteFrom(NEWS).where(NEWS.ID.eq(id)).execute();
         if (deleted == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found");
         }
+    }
+
+    private String resolveUrl(String objectName) {
+        if (objectName == null || objectName.startsWith("http")) return objectName;
+        return minioService.presignedUrl(BUCKET, objectName, 24);
     }
 }

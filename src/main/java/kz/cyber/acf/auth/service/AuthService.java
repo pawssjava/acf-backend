@@ -143,8 +143,6 @@ public class AuthService {
 
         KeycloakUserRequest keycloakUser = KeycloakUserRequest.builder()
                 .username(req.getUsername())
-                .firstName(req.getFirstName())
-                .lastName(req.getLastName())
                 .enabled(true)
                 .emailVerified(true)
                 .requiredActions(List.of())

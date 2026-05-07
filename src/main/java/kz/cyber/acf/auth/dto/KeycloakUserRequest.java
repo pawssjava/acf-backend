@@ -9,8 +9,6 @@ import java.util.List;
 @Builder
 public class KeycloakUserRequest {
     private String username;
-    private String firstName;
-    private String lastName;
     private boolean enabled;
     private boolean emailVerified;
     private List<KeycloakCredential> credentials;
