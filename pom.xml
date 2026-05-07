@@ -17,6 +17,7 @@
     <properties>
         <java.version>21</java.version>
         <org.jooq.version>3.20.3</org.jooq.version>
+        <spring-cloud.version>2024.0.1</spring-cloud.version>
         <db.driver>org.postgresql.Driver</db.driver>
         <db.url>jdbc:postgresql://localhost:5432/postgres?currentSchema=acf></db.url>
         <db.username>postgres</db.username>
@@ -30,11 +31,11 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!--        &lt;!&ndash; Security &ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-starter-security</artifactId>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.8</version>
+        </dependency>
 
         <!-- OAuth2 Resource Server — validates Keycloak JWTs -->
         <dependency>
@@ -66,13 +67,40 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <!-- JAXB API — required by jOOQ internals -->
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>

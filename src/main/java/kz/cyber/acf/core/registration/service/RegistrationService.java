@@ -1,0 +1,76 @@
+package kz.cyber.acf.core.registration.service;
+
+import kz.cyber.acf.core.registration.dto.ParticipantDto;
+import lombok.RequiredArgsConstructor;
+import org.jooq.impl.DefaultDSLContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+
+import static group.bi.postsales.database.Tables.*;
+
+@Service
+@RequiredArgsConstructor
+public class RegistrationService {
+
+    private final DefaultDSLContext dsl;
+
+    public ParticipantDto register(Long tournamentId, Long userId) {
+        var tournament = dsl.selectFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(tournamentId)).fetchOne();
+        if (tournament == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+        }
+
+        int currentCount = dsl.fetchCount(TOURNAMENT_REGISTRATION, TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId));
+        if (tournament.getCapacity() != null && currentCount >= tournament.getCapacity()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tournament is full");
+        }
+
+        dsl.insertInto(TOURNAMENT_REGISTRATION)
+                .set(TOURNAMENT_REGISTRATION.TOURNAMENT_ID, tournamentId)
+                .set(TOURNAMENT_REGISTRATION.USER_ID, userId)
+                .execute();
+
+        return getParticipants(tournamentId).stream()
+                .filter(p -> p.getUserId().equals(userId))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    public void unregister(Long tournamentId, Long userId) {
+        int deleted = dsl.deleteFrom(TOURNAMENT_REGISTRATION)
+                .where(TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId)
+                        .and(TOURNAMENT_REGISTRATION.USER_ID.eq(userId)))
+                .execute();
+        if (deleted == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Registration not found");
+        }
+    }
+
+    public List<ParticipantDto> getParticipants(Long tournamentId) {
+        return dsl.select(
+                        TOURNAMENT_REGISTRATION.ID,
+                        TOURNAMENT_REGISTRATION.TOURNAMENT_ID,
+                        TOURNAMENT_REGISTRATION.USER_ID,
+                        USER.USERNAME,
+                        USER.FIRST_NAME,
+                        USER.LAST_NAME,
+                        TOURNAMENT_REGISTRATION.REGISTERED_DATE
+                )
+                .from(TOURNAMENT_REGISTRATION)
+                .join(USER).on(TOURNAMENT_REGISTRATION.USER_ID.eq(USER.ID))
+                .where(TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId))
+                .orderBy(TOURNAMENT_REGISTRATION.REGISTERED_DATE.asc())
+                .fetch(r -> new ParticipantDto(
+                        r.get(TOURNAMENT_REGISTRATION.ID),
+                        r.get(TOURNAMENT_REGISTRATION.TOURNAMENT_ID),
+                        r.get(TOURNAMENT_REGISTRATION.USER_ID),
+                        r.get(USER.USERNAME),
+                        r.get(USER.FIRST_NAME),
+                        r.get(USER.LAST_NAME),
+                        r.get(TOURNAMENT_REGISTRATION.REGISTERED_DATE)
+                ));
+    }
+}

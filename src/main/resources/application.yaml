@@ -1,29 +1,30 @@
+server:
+  port: 9002
+
 spring:
   application:
     name: acf
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AUTH_URL:asd}/realms/${AUTH_REALM:asd}
 
   datasource:
     url: ${db_url}
     username: ${db_username}
     password: ${db_password}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: '50'
 
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-
+  servlet:
+    multipart:
+      max-request-size: 1500MB
+      max-file-size: 1500MB
   jooq:
     sql-dialect: POSTGRES
-
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          # Point this at your Keycloak realm; app fetches JWKS automatically
-          issuer-uri: http://localhost:8180/realms/acf
-
-server:
-  port: 8080
 
 management:
   endpoints:
@@ -33,3 +34,17 @@ management:
   endpoint:
     health:
       show-details: always
+logging:
+  level:
+    root: WARN
+
+application:
+  url: ${APP_BASE_URL:asd}
+  keycloak:
+    admin-auth-client-secret: ${ADMIN_AUTH_CLIENT_SECRET:asd}
+    admin-auth-client-id: ${ADMIN_AUTH_CLIENT_ID:asd}
+    admin-auth-url: ${AUTH_URL:asd}
+  sms-base-url: ${SMS_BASE_URL:asd}
+  minio-url: ${MINIO_URL:asd}
+  minio-login: ${MINIO_LOGIN:asd}
+  minio-password: ${MINIO_PASSWORD:asd}

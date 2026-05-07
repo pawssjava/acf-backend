@@ -65,6 +65,11 @@ public class User extends TableImpl<UserRecord> {
     public final TableField<UserRecord, String> USERNAME = createField(DSL.name("username"), SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
+     * The column <code>acf.user.phone_number</code>.
+     */
+    public final TableField<UserRecord, Long> PHONE_NUMBER = createField(DSL.name("phone_number"), SQLDataType.BIGINT, this, "");
+
+    /**
      * The column <code>acf.user.first_name</code>.
      */
     public final TableField<UserRecord, String> FIRST_NAME = createField(DSL.name("first_name"), SQLDataType.VARCHAR, this, "");

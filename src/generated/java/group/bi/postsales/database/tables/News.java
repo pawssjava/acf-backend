@@ -67,6 +67,11 @@ public class News extends TableImpl<NewsRecord> {
     public final TableField<NewsRecord, String> DESCRIPTION = createField(DSL.name("description"), SQLDataType.CLOB, this, "");
 
     /**
+     * The column <code>acf.news.image</code>.
+     */
+    public final TableField<NewsRecord, String> IMAGE = createField(DSL.name("image"), SQLDataType.VARCHAR, this, "");
+
+    /**
      * The column <code>acf.news.updated_date</code>.
      */
     public final TableField<NewsRecord, OffsetDateTime> UPDATED_DATE = createField(DSL.name("updated_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");

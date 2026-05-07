@@ -50,101 +50,115 @@ public class UserRecord extends UpdatableRecordImpl<UserRecord> {
     }
 
     /**
+     * Setter for <code>acf.user.phone_number</code>.
+     */
+    public void setPhoneNumber(Long value) {
+        set(2, value);
+    }
+
+    /**
+     * Getter for <code>acf.user.phone_number</code>.
+     */
+    public Long getPhoneNumber() {
+        return (Long) get(2);
+    }
+
+    /**
      * Setter for <code>acf.user.first_name</code>.
      */
     public void setFirstName(String value) {
-        set(2, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>acf.user.first_name</code>.
      */
     public String getFirstName() {
-        return (String) get(2);
+        return (String) get(3);
     }
 
     /**
      * Setter for <code>acf.user.last_name</code>.
      */
     public void setLastName(String value) {
-        set(3, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>acf.user.last_name</code>.
      */
     public String getLastName() {
-        return (String) get(3);
+        return (String) get(4);
     }
 
     /**
      * Setter for <code>acf.user.birth_date</code>.
      */
     public void setBirthDate(LocalDate value) {
-        set(4, value);
+        set(5, value);
     }
 
     /**
      * Getter for <code>acf.user.birth_date</code>.
      */
     public LocalDate getBirthDate() {
-        return (LocalDate) get(4);
+        return (LocalDate) get(5);
     }
 
     /**
      * Setter for <code>acf.user.is_admin</code>.
      */
     public void setIsAdmin(Boolean value) {
-        set(5, value);
+        set(6, value);
     }
 
     /**
      * Getter for <code>acf.user.is_admin</code>.
      */
     public Boolean getIsAdmin() {
-        return (Boolean) get(5);
+        return (Boolean) get(6);
     }
 
     /**
      * Setter for <code>acf.user.photo</code>.
      */
     public void setPhoto(String value) {
-        set(6, value);
+        set(7, value);
     }
 
     /**
      * Getter for <code>acf.user.photo</code>.
      */
     public String getPhoto() {
-        return (String) get(6);
+        return (String) get(7);
     }
 
     /**
      * Setter for <code>acf.user.updated_date</code>.
      */
     public void setUpdatedDate(OffsetDateTime value) {
-        set(7, value);
+        set(8, value);
     }
 
     /**
      * Getter for <code>acf.user.updated_date</code>.
      */
     public OffsetDateTime getUpdatedDate() {
-        return (OffsetDateTime) get(7);
+        return (OffsetDateTime) get(8);
     }
 
     /**
      * Setter for <code>acf.user.created_date</code>.
      */
     public void setCreatedDate(OffsetDateTime value) {
-        set(8, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>acf.user.created_date</code>.
      */
     public OffsetDateTime getCreatedDate() {
-        return (OffsetDateTime) get(8);
+        return (OffsetDateTime) get(9);
     }
 
     // -------------------------------------------------------------------------
@@ -170,11 +184,12 @@ public class UserRecord extends UpdatableRecordImpl<UserRecord> {
     /**
      * Create a detached, initialised UserRecord
      */
-    public UserRecord(Long id, String username, String firstName, String lastName, LocalDate birthDate, Boolean isAdmin, String photo, OffsetDateTime updatedDate, OffsetDateTime createdDate) {
+    public UserRecord(Long id, String username, Long phoneNumber, String firstName, String lastName, LocalDate birthDate, Boolean isAdmin, String photo, OffsetDateTime updatedDate, OffsetDateTime createdDate) {
         super(User.USER);
 
         setId(id);
         setUsername(username);
+        setPhoneNumber(phoneNumber);
         setFirstName(firstName);
         setLastName(lastName);
         setBirthDate(birthDate);

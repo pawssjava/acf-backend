@@ -11,7 +11,7 @@ target/
 .settings
 .springBeans
 .sts4-cache
-
+FRONTEND_AGENT_BRIEF.md
 ### IntelliJ IDEA ###
 .idea
 *.iws

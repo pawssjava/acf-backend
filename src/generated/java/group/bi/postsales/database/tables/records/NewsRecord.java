@@ -63,31 +63,45 @@ public class NewsRecord extends UpdatableRecordImpl<NewsRecord> {
     }
 
     /**
+     * Setter for <code>acf.news.image</code>.
+     */
+    public void setImage(String value) {
+        set(3, value);
+    }
+
+    /**
+     * Getter for <code>acf.news.image</code>.
+     */
+    public String getImage() {
+        return (String) get(3);
+    }
+
+    /**
      * Setter for <code>acf.news.updated_date</code>.
      */
     public void setUpdatedDate(OffsetDateTime value) {
-        set(3, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>acf.news.updated_date</code>.
      */
     public OffsetDateTime getUpdatedDate() {
-        return (OffsetDateTime) get(3);
+        return (OffsetDateTime) get(4);
     }
 
     /**
      * Setter for <code>acf.news.created_date</code>.
      */
     public void setCreatedDate(OffsetDateTime value) {
-        set(4, value);
+        set(5, value);
     }
 
     /**
      * Getter for <code>acf.news.created_date</code>.
      */
     public OffsetDateTime getCreatedDate() {
-        return (OffsetDateTime) get(4);
+        return (OffsetDateTime) get(5);
     }
 
     // -------------------------------------------------------------------------
@@ -113,12 +127,13 @@ public class NewsRecord extends UpdatableRecordImpl<NewsRecord> {
     /**
      * Create a detached, initialised NewsRecord
      */
-    public NewsRecord(Long id, String title, String description, OffsetDateTime updatedDate, OffsetDateTime createdDate) {
+    public NewsRecord(Long id, String title, String description, String image, OffsetDateTime updatedDate, OffsetDateTime createdDate) {
         super(News.NEWS);
 
         setId(id);
         setTitle(title);
         setDescription(description);
+        setImage(image);
         setUpdatedDate(updatedDate);
         setCreatedDate(createdDate);
         resetTouchedOnNotNull();
