@@ -19,7 +19,7 @@ import static group.bi.postsales.database.Tables.*;
 @RequiredArgsConstructor
 public class TournamentService {
 
-    private static final String BUCKET = "tournaments";
+    private static final String FOLDER = "tournaments";
 
     private final DefaultDSLContext dsl;
     private final MinioService minioService;
@@ -129,7 +129,7 @@ public class TournamentService {
 
     public TournamentDto uploadLogo(Long id, MultipartFile file) {
         findById(id);
-        String objectName = minioService.upload(BUCKET, file);
+        String objectName = minioService.upload(FOLDER, file);
         dsl.update(TOURNAMENT)
                 .set(TOURNAMENT.LOGO, objectName)
                 .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now())
@@ -147,6 +147,6 @@ public class TournamentService {
 
     private String resolveUrl(String objectName) {
         if (objectName == null || objectName.startsWith("http")) return objectName;
-        return minioService.presignedUrl(BUCKET, objectName, 24);
+        return minioService.presignedUrl(objectName, 24);
     }
 }

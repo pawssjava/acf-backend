@@ -31,3 +31,7 @@ build/
 ### VS Code ###
 .vscode/
 *.sql
+.dockerignore
+Caddyfile
+docker-compose.yml
+Dockerfile

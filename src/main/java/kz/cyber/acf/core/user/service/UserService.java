@@ -32,6 +32,18 @@ public class UserService {
         ));
     }
 
+    public UserDto findByUsername(String username) {
+        return dsl.selectFrom(USER)
+                .where(USER.USERNAME.eq(username))
+                .fetchOptional()
+                .map(r -> new UserDto(
+                        r.getId(), r.getUsername(), r.getPhoneNumber(),
+                        r.getFirstName(), r.getLastName(), r.getBirthDate(),
+                        r.getIsAdmin(), resolveUrl(r.getPhoto()), r.getCreatedDate(), r.getUpdatedDate()
+                ))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
     public UserDto findById(Long id) {
         return dsl.selectFrom(USER)
                 .where(USER.ID.eq(id))
@@ -78,6 +90,6 @@ public class UserService {
 
     private String resolveUrl(String objectName) {
         if (objectName == null || objectName.startsWith("http")) return objectName;
-        return minioService.presignedUrl(BUCKET, objectName, 24);
+        return minioService.presignedUrl(objectName, 24);
     }
 }

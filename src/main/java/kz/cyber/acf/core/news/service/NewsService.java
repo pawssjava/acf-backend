@@ -82,6 +82,6 @@ public class NewsService {
 
     private String resolveUrl(String objectName) {
         if (objectName == null || objectName.startsWith("http")) return objectName;
-        return minioService.presignedUrl(BUCKET, objectName, 24);
+        return minioService.presignedUrl(objectName, 24);
     }
 }

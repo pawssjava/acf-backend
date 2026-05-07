@@ -14,15 +14,17 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class MinioService {
 
+    private static final String BUCKET = "acf";
+
     private final MinioClient minioClient;
 
-    public String upload(String bucket, MultipartFile file) {
+    public String upload(String folder, MultipartFile file) {
         try {
-            ensureBucket(bucket);
-            String objectName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            ensureBucket();
+            String objectName = folder + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
             minioClient.putObject(
                     PutObjectArgs.builder()
-                            .bucket(bucket)
+                            .bucket(BUCKET)
                             .object(objectName)
                             .stream(file.getInputStream(), file.getSize(), -1)
                             .contentType(file.getContentType())
@@ -34,11 +36,11 @@ public class MinioService {
         }
     }
 
-    public InputStream download(String bucket, String objectName) {
+    public InputStream download(String objectName) {
         try {
             return minioClient.getObject(
                     GetObjectArgs.builder()
-                            .bucket(bucket)
+                            .bucket(BUCKET)
                             .object(objectName)
                             .build()
             );
@@ -47,11 +49,11 @@ public class MinioService {
         }
     }
 
-    public void delete(String bucket, String objectName) {
+    public void delete(String objectName) {
         try {
             minioClient.removeObject(
                     RemoveObjectArgs.builder()
-                            .bucket(bucket)
+                            .bucket(BUCKET)
                             .object(objectName)
                             .build()
             );
@@ -60,12 +62,12 @@ public class MinioService {
         }
     }
 
-    public String presignedUrl(String bucket, String objectName, int expiryHours) {
+    public String presignedUrl(String objectName, int expiryHours) {
         try {
             return minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
-                            .bucket(bucket)
+                            .bucket(BUCKET)
                             .object(objectName)
                             .expiry(expiryHours, TimeUnit.HOURS)
                             .build()
@@ -75,10 +77,10 @@ public class MinioService {
         }
     }
 
-    private void ensureBucket(String bucket) throws Exception {
-        boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
+    private void ensureBucket() throws Exception {
+        boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET).build());
         if (!exists) {
-            minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
+            minioClient.makeBucket(MakeBucketArgs.builder().bucket(BUCKET).build());
         }
     }
 }

@@ -10,6 +10,8 @@ import kz.cyber.acf.core.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +24,12 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
+    @Operation(summary = "Get current user", description = "Returns the profile of the authenticated user derived from the JWT token.")
+    @GetMapping("/me")
+    public UserDto me(@AuthenticationPrincipal Jwt jwt) {
+        return userService.findByUsername(jwt.getClaimAsString("preferred_username"));
+    }
 
     @Operation(summary = "List all users", description = "Returns every registered user.")
     @GetMapping

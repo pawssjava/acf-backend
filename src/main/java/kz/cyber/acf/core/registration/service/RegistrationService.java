@@ -23,6 +23,21 @@ public class RegistrationService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
         }
 
+        String statusName = dsl.select(D_TOURNAMENT_STATUS.NAME)
+                .from(D_TOURNAMENT_STATUS)
+                .where(D_TOURNAMENT_STATUS.ID.eq(tournament.getTournamentStatus()))
+                .fetchOneInto(String.class);
+        if (!"Будущие".equals(statusName)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Registration is only allowed for upcoming tournaments");
+        }
+
+        boolean alreadyRegistered = dsl.fetchExists(TOURNAMENT_REGISTRATION,
+                TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId)
+                        .and(TOURNAMENT_REGISTRATION.USER_ID.eq(userId)));
+        if (alreadyRegistered) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already registered for this tournament");
+        }
+
         int currentCount = dsl.fetchCount(TOURNAMENT_REGISTRATION, TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId));
         if (tournament.getCapacity() != null && currentCount >= tournament.getCapacity()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tournament is full");
@@ -40,6 +55,18 @@ public class RegistrationService {
     }
 
     public void unregister(Long tournamentId, Long userId) {
+        String statusName = dsl.select(D_TOURNAMENT_STATUS.NAME)
+                .from(TOURNAMENT)
+                .join(D_TOURNAMENT_STATUS).on(D_TOURNAMENT_STATUS.ID.eq(TOURNAMENT.TOURNAMENT_STATUS))
+                .where(TOURNAMENT.ID.eq(tournamentId))
+                .fetchOneInto(String.class);
+        if (statusName == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+        }
+        if (!"Будущие".equals(statusName)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unregistration is only allowed for upcoming tournaments");
+        }
+
         int deleted = dsl.deleteFrom(TOURNAMENT_REGISTRATION)
                 .where(TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId)
                         .and(TOURNAMENT_REGISTRATION.USER_ID.eq(userId)))

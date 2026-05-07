@@ -9,7 +9,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${AUTH_URL}/realms/${AUTH_REALM}
+          jwk-set-uri: ${AUTH_URL}/realms/${AUTH_REALM}/protocol/openid-connect/certs
 
   datasource:
     url: ${db_url}
