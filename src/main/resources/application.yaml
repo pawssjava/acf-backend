@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: acf
+
+  datasource:
+    url: ${db_url}
+    username: ${db_username}
+    password: ${db_password}
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  jooq:
+    sql-dialect: POSTGRES
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Point this at your Keycloak realm; app fetches JWKS automatically
+          issuer-uri: http://localhost:8180/realms/acf
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
