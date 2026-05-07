@@ -9,7 +9,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${AUTH_URL:asd}/realms/${AUTH_REALM:asd}
+          issuer-uri: ${AUTH_URL}/realms/${AUTH_REALM}
 
   datasource:
     url: ${db_url}
@@ -41,10 +41,11 @@ logging:
 application:
   url: ${APP_BASE_URL:asd}
   keycloak:
-    admin-auth-client-secret: ${ADMIN_AUTH_CLIENT_SECRET:asd}
-    admin-auth-client-id: ${ADMIN_AUTH_CLIENT_ID:asd}
-    admin-auth-url: ${AUTH_URL:asd}
+    admin-auth-client-secret: ${ADMIN_AUTH_CLIENT_SECRET}
+    admin-auth-client-id: ${ADMIN_AUTH_CLIENT_ID}
+    admin-auth-url: ${AUTH_URL}
+    realm: ${AUTH_REALM}
   sms-base-url: ${SMS_BASE_URL:asd}
-  minio-url: ${MINIO_URL:asd}
-  minio-login: ${MINIO_LOGIN:asd}
-  minio-password: ${MINIO_PASSWORD:asd}
+  minio-url: ${MINIO_URL}
+  minio-login: ${MINIO_LOGIN}
+  minio-password: ${MINIO_PASSWORD}

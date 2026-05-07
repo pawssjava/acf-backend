@@ -1,14 +1,27 @@
 package kz.cyber.acf.auth.service;
 
+import kz.cyber.acf.auth.client.KeycloakAdminClient;
+import kz.cyber.acf.auth.client.KeycloakTokenClient;
+import kz.cyber.acf.auth.dto.ForgotPasswordRequest;
+import kz.cyber.acf.auth.dto.KeycloakCredential;
+import kz.cyber.acf.auth.dto.KeycloakPasswordResetRequest;
+import kz.cyber.acf.auth.dto.KeycloakUserRequest;
+import kz.cyber.acf.auth.dto.KeycloakUserResponse;
 import kz.cyber.acf.auth.dto.RegisterRequest;
+import kz.cyber.acf.auth.dto.TokenResponse;
 import kz.cyber.acf.core.user.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import static group.bi.postsales.database.Tables.USER;
 
@@ -18,15 +31,55 @@ public class AuthService {
 
     private final DefaultDSLContext dsl;
     private final SmsVerificationService smsService;
+    private final KeycloakTokenClient keycloakTokenClient;
+    private final KeycloakAdminClient keycloakAdminClient;
+
+    @Value("${application.keycloak.admin-auth-client-id}")
+    private String clientId;
+
+    @Value("${application.keycloak.admin-auth-client-secret}")
+    private String clientSecret;
+
+    @Value("${application.keycloak.realm}")
+    private String realm;
 
     public void sendSms(String phone) {
         smsService.sendCode(phone);
+    }
+
+    public TokenResponse login(String username, String password) {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("client_id", clientId);
+        form.add("client_secret", clientSecret);
+        form.add("grant_type", "password");
+        form.add("username", username);
+        form.add("password", password);
+        return keycloakTokenClient.token(realm, form);
+    }
+
+    public TokenResponse refresh(String refreshToken) {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("client_id", clientId);
+        form.add("client_secret", clientSecret);
+        form.add("grant_type", "refresh_token");
+        form.add("refresh_token", refreshToken);
+        return keycloakTokenClient.token(realm, form);
+    }
+
+    public void logout(String refreshToken) {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("client_id", clientId);
+        form.add("client_secret", clientSecret);
+        form.add("refresh_token", refreshToken);
+        keycloakTokenClient.logout(realm, form);
     }
 
     public UserDto register(RegisterRequest req) {
         if (!smsService.verifyCode(req.getPhone(), req.getCode())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid SMS code");
         }
+
+        createKeycloakUser(req);
 
         var record = dsl.insertInto(USER)
                 .set(USER.USERNAME, req.getUsername())
@@ -48,5 +101,64 @@ public class AuthService {
                 record.getIsAdmin(), record.getPhoto(),
                 record.getCreatedDate(), record.getUpdatedDate()
         );
+    }
+
+    public void sendForgotPasswordSms(String phone) {
+        dsl.selectFrom(USER)
+                .where(USER.PHONE_NUMBER.eq(Long.parseLong(phone)))
+                .fetchOptional()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        smsService.sendCode(phone);
+    }
+
+    public void resetPassword(ForgotPasswordRequest req) {
+        if (!smsService.verifyCode(req.getPhone(), req.getCode())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid SMS code");
+        }
+
+        String username = dsl.selectFrom(USER)
+                .where(USER.PHONE_NUMBER.eq(Long.parseLong(req.getPhone())))
+                .fetchOptional()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"))
+                .getUsername();
+
+        String adminToken = "Bearer " + adminToken().getAccessToken();
+
+        List<KeycloakUserResponse> users = keycloakAdminClient.findUsers(adminToken, realm, username, true);
+        if (users.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Keycloak user not found");
+        }
+
+        keycloakAdminClient.resetPassword(
+                adminToken, realm, users.get(0).getId(),
+                new KeycloakPasswordResetRequest("password", req.getNewPassword(), false)
+        );
+
+        smsService.invalidate(req.getPhone());
+    }
+
+    private void createKeycloakUser(RegisterRequest req) {
+        String adminToken = "Bearer " + adminToken().getAccessToken();
+
+        KeycloakUserRequest keycloakUser = KeycloakUserRequest.builder()
+                .username(req.getUsername())
+                .firstName(req.getFirstName())
+                .lastName(req.getLastName())
+                .enabled(true)
+                .emailVerified(true)
+                .requiredActions(List.of())
+                .credentials(List.of(new KeycloakCredential("password", req.getPassword(), false)))
+                .build();
+
+        keycloakAdminClient.createUser(adminToken, realm, keycloakUser);
+    }
+
+    private TokenResponse adminToken() {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("client_id", clientId);
+        form.add("client_secret", clientSecret);
+        form.add("grant_type", "client_credentials");
+        return keycloakTokenClient.token(realm, form);
     }
 }
