@@ -16,6 +16,7 @@ public class TournamentDto {
     private String name;
     private String logo;
     private LocalDate startDate;
+    private LocalDate endDate;
     private Integer capacity;
     private BigDecimal prizeMoney;
     private Long tournamentStatusId;
@@ -24,4 +25,7 @@ public class TournamentDto {
     private String tournamentTypeName;
     private OffsetDateTime createdDate;
     private OffsetDateTime updatedDate;
+    private String format;
+    private String phase;
+    private Integer totalRounds;
 }

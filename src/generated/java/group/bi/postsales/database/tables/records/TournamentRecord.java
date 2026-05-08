@@ -162,6 +162,62 @@ public class TournamentRecord extends UpdatableRecordImpl<TournamentRecord> {
         return (OffsetDateTime) get(9);
     }
 
+    /**
+     * Setter for <code>acf.tournament.end_date</code>.
+     */
+    public void setEndDate(LocalDate value) {
+        set(10, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.end_date</code>.
+     */
+    public LocalDate getEndDate() {
+        return (LocalDate) get(10);
+    }
+
+    /**
+     * Setter for <code>acf.tournament.format</code>.
+     */
+    public void setFormat(String value) {
+        set(11, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.format</code>.
+     */
+    public String getFormat() {
+        return (String) get(11);
+    }
+
+    /**
+     * Setter for <code>acf.tournament.phase</code>.
+     */
+    public void setPhase(String value) {
+        set(12, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.phase</code>.
+     */
+    public String getPhase() {
+        return (String) get(12);
+    }
+
+    /**
+     * Setter for <code>acf.tournament.total_rounds</code>.
+     */
+    public void setTotalRounds(Integer value) {
+        set(13, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.total_rounds</code>.
+     */
+    public Integer getTotalRounds() {
+        return (Integer) get(13);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -185,7 +241,7 @@ public class TournamentRecord extends UpdatableRecordImpl<TournamentRecord> {
     /**
      * Create a detached, initialised TournamentRecord
      */
-    public TournamentRecord(Long id, String name, String logo, LocalDate startDate, Integer capacity, BigDecimal prizeMoney, Long tournamentStatus, Long tournamentType, OffsetDateTime updatedDate, OffsetDateTime createdDate) {
+    public TournamentRecord(Long id, String name, String logo, LocalDate startDate, Integer capacity, BigDecimal prizeMoney, Long tournamentStatus, Long tournamentType, OffsetDateTime updatedDate, OffsetDateTime createdDate, LocalDate endDate, String format, String phase, Integer totalRounds) {
         super(Tournament.TOURNAMENT);
 
         setId(id);
@@ -198,6 +254,10 @@ public class TournamentRecord extends UpdatableRecordImpl<TournamentRecord> {
         setTournamentType(tournamentType);
         setUpdatedDate(updatedDate);
         setCreatedDate(createdDate);
+        setEndDate(endDate);
+        setFormat(format);
+        setPhase(phase);
+        setTotalRounds(totalRounds);
         resetTouchedOnNotNull();
     }
 }

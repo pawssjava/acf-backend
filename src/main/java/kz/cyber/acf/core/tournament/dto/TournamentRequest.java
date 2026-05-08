@@ -9,8 +9,11 @@ import java.time.LocalDate;
 public class TournamentRequest {
     private String name;
     private LocalDate startDate;
+    private LocalDate endDate;
     private Integer capacity;
     private BigDecimal prizeMoney;
     private Long tournamentStatusId;
     private Long tournamentTypeId;
+    private String format;
+    private Integer totalRounds;
 }

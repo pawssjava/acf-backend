@@ -103,6 +103,26 @@ public class Tournament extends TableImpl<TournamentRecord> {
      */
     public final TableField<TournamentRecord, OffsetDateTime> CREATED_DATE = createField(DSL.name("created_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
+    /**
+     * The column <code>acf.tournament.end_date</code>.
+     */
+    public final TableField<TournamentRecord, LocalDate> END_DATE = createField(DSL.name("end_date"), SQLDataType.LOCALDATE, this, "");
+
+    /**
+     * The column <code>acf.tournament.format</code>.
+     */
+    public final TableField<TournamentRecord, String> FORMAT = createField(DSL.name("format"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>acf.tournament.phase</code>.
+     */
+    public final TableField<TournamentRecord, String> PHASE = createField(DSL.name("phase"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>acf.tournament.total_rounds</code>.
+     */
+    public final TableField<TournamentRecord, Integer> TOTAL_ROUNDS = createField(DSL.name("total_rounds"), SQLDataType.INTEGER, this, "");
+
     private Tournament(Name alias, Table<TournamentRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

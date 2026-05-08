@@ -8,6 +8,7 @@ import group.bi.postsales.database.tables.DTournamentStatus;
 import group.bi.postsales.database.tables.DTournamentType;
 import group.bi.postsales.database.tables.News;
 import group.bi.postsales.database.tables.Tournament;
+import group.bi.postsales.database.tables.TournamentMatch;
 import group.bi.postsales.database.tables.TournamentRegistration;
 import group.bi.postsales.database.tables.TournamentResult;
 import group.bi.postsales.database.tables.User;
@@ -55,6 +56,11 @@ public class Acf extends SchemaImpl {
     public final Tournament TOURNAMENT = Tournament.TOURNAMENT;
 
     /**
+     * The table <code>acf.tournament_match</code>.
+     */
+    public final TournamentMatch TOURNAMENT_MATCH = TournamentMatch.TOURNAMENT_MATCH;
+
+    /**
      * The table <code>acf.tournament_registration</code>.
      */
     public final TournamentRegistration TOURNAMENT_REGISTRATION = TournamentRegistration.TOURNAMENT_REGISTRATION;
@@ -89,6 +95,7 @@ public class Acf extends SchemaImpl {
             DTournamentType.D_TOURNAMENT_TYPE,
             News.NEWS,
             Tournament.TOURNAMENT,
+            TournamentMatch.TOURNAMENT_MATCH,
             TournamentRegistration.TOURNAMENT_REGISTRATION,
             TournamentResult.TOURNAMENT_RESULT,
             User.USER

@@ -67,7 +67,7 @@ public class User extends TableImpl<UserRecord> {
     /**
      * The column <code>acf.user.phone_number</code>.
      */
-    public final TableField<UserRecord, Long> PHONE_NUMBER = createField(DSL.name("phone_number"), SQLDataType.BIGINT, this, "");
+    public final TableField<UserRecord, Long> PHONE_NUMBER = createField(DSL.name("phone_number"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>acf.user.first_name</code>.
@@ -150,7 +150,7 @@ public class User extends TableImpl<UserRecord> {
 
     @Override
     public List<UniqueKey<UserRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.USER_USERNAME_KEY);
+        return Arrays.asList(Keys.USER_PK, Keys.USER_USERNAME_KEY);
     }
 
     @Override

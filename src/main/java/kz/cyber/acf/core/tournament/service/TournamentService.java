@@ -11,7 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Set;
 
 import static group.bi.postsales.database.Tables.*;
 
@@ -19,7 +21,13 @@ import static group.bi.postsales.database.Tables.*;
 @RequiredArgsConstructor
 public class TournamentService {
 
-    private static final String FOLDER = "tournaments";
+    private static final ZoneOffset ZONE          = ZoneOffset.ofHours(5);
+    private static final String FOLDER           = "tournaments";
+    private static final String FORMAT_EKPL      = "EKPL";
+    private static final Long   TYPE_EKPL        = 5L;
+    private static final Long   STATUS_UPCOMING  = 2L;
+    private static final Long   STATUS_ACTIVE    = 1L;
+    private static final Set<String> VALID_FORMATS = Set.of("SINGLE_ELIMINATION", "SWISS", "EKPL");
 
     private final DefaultDSLContext dsl;
     private final MinioService minioService;
@@ -30,6 +38,7 @@ public class TournamentService {
                         TOURNAMENT.NAME,
                         TOURNAMENT.LOGO,
                         TOURNAMENT.START_DATE,
+                        TOURNAMENT.END_DATE,
                         TOURNAMENT.CAPACITY,
                         TOURNAMENT.PRIZE_MONEY,
                         TOURNAMENT.TOURNAMENT_STATUS,
@@ -37,7 +46,10 @@ public class TournamentService {
                         TOURNAMENT.TOURNAMENT_TYPE,
                         D_TOURNAMENT_TYPE.NAME.as("type_name"),
                         TOURNAMENT.CREATED_DATE,
-                        TOURNAMENT.UPDATED_DATE
+                        TOURNAMENT.UPDATED_DATE,
+                        TOURNAMENT.FORMAT,
+                        TOURNAMENT.PHASE,
+                        TOURNAMENT.TOTAL_ROUNDS
                 )
                 .from(TOURNAMENT)
                 .leftJoin(D_TOURNAMENT_STATUS).on(TOURNAMENT.TOURNAMENT_STATUS.eq(D_TOURNAMENT_STATUS.ID))
@@ -48,6 +60,7 @@ public class TournamentService {
                         r.get(TOURNAMENT.NAME),
                         resolveUrl(r.get(TOURNAMENT.LOGO)),
                         r.get(TOURNAMENT.START_DATE),
+                        r.get(TOURNAMENT.END_DATE),
                         r.get(TOURNAMENT.CAPACITY),
                         r.get(TOURNAMENT.PRIZE_MONEY),
                         r.get(TOURNAMENT.TOURNAMENT_STATUS),
@@ -55,7 +68,10 @@ public class TournamentService {
                         r.get(TOURNAMENT.TOURNAMENT_TYPE),
                         r.get("type_name", String.class),
                         r.get(TOURNAMENT.CREATED_DATE),
-                        r.get(TOURNAMENT.UPDATED_DATE)
+                        r.get(TOURNAMENT.UPDATED_DATE),
+                        r.get(TOURNAMENT.FORMAT),
+                        r.get(TOURNAMENT.PHASE),
+                        r.get(TOURNAMENT.TOTAL_ROUNDS)
                 ));
     }
 
@@ -65,6 +81,7 @@ public class TournamentService {
                         TOURNAMENT.NAME,
                         TOURNAMENT.LOGO,
                         TOURNAMENT.START_DATE,
+                        TOURNAMENT.END_DATE,
                         TOURNAMENT.CAPACITY,
                         TOURNAMENT.PRIZE_MONEY,
                         TOURNAMENT.TOURNAMENT_STATUS,
@@ -72,7 +89,10 @@ public class TournamentService {
                         TOURNAMENT.TOURNAMENT_TYPE,
                         D_TOURNAMENT_TYPE.NAME.as("type_name"),
                         TOURNAMENT.CREATED_DATE,
-                        TOURNAMENT.UPDATED_DATE
+                        TOURNAMENT.UPDATED_DATE,
+                        TOURNAMENT.FORMAT,
+                        TOURNAMENT.PHASE,
+                        TOURNAMENT.TOTAL_ROUNDS
                 )
                 .from(TOURNAMENT)
                 .leftJoin(D_TOURNAMENT_STATUS).on(TOURNAMENT.TOURNAMENT_STATUS.eq(D_TOURNAMENT_STATUS.ID))
@@ -83,6 +103,7 @@ public class TournamentService {
                         r.get(TOURNAMENT.NAME),
                         resolveUrl(r.get(TOURNAMENT.LOGO)),
                         r.get(TOURNAMENT.START_DATE),
+                        r.get(TOURNAMENT.END_DATE),
                         r.get(TOURNAMENT.CAPACITY),
                         r.get(TOURNAMENT.PRIZE_MONEY),
                         r.get(TOURNAMENT.TOURNAMENT_STATUS),
@@ -90,40 +111,63 @@ public class TournamentService {
                         r.get(TOURNAMENT.TOURNAMENT_TYPE),
                         r.get("type_name", String.class),
                         r.get(TOURNAMENT.CREATED_DATE),
-                        r.get(TOURNAMENT.UPDATED_DATE)
+                        r.get(TOURNAMENT.UPDATED_DATE),
+                        r.get(TOURNAMENT.FORMAT),
+                        r.get(TOURNAMENT.PHASE),
+                        r.get(TOURNAMENT.TOTAL_ROUNDS)
                 ))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found"));
     }
 
     public TournamentDto create(TournamentRequest req) {
+        validateFormat(req.getFormat(), req.getTournamentTypeId());
+
         Long id = dsl.insertInto(TOURNAMENT)
                 .set(TOURNAMENT.NAME, req.getName())
                 .set(TOURNAMENT.START_DATE, req.getStartDate())
+                .set(TOURNAMENT.END_DATE, req.getEndDate())
                 .set(TOURNAMENT.CAPACITY, req.getCapacity())
                 .set(TOURNAMENT.PRIZE_MONEY, req.getPrizeMoney())
-                .set(TOURNAMENT.TOURNAMENT_STATUS, req.getTournamentStatusId())
+                .set(TOURNAMENT.TOURNAMENT_STATUS, STATUS_UPCOMING)
                 .set(TOURNAMENT.TOURNAMENT_TYPE, req.getTournamentTypeId())
-                .set(TOURNAMENT.CREATED_DATE, OffsetDateTime.now())
-                .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now())
+                .set(TOURNAMENT.FORMAT, req.getFormat())
+                .set(TOURNAMENT.TOTAL_ROUNDS, req.getTotalRounds())
+                .set(TOURNAMENT.CREATED_DATE, OffsetDateTime.now(ZONE))
+                .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now(ZONE))
                 .returning(TOURNAMENT.ID)
                 .fetchOne(TOURNAMENT.ID);
         return findById(id);
     }
 
     public TournamentDto update(Long id, TournamentRequest req) {
+        var existing = dsl.selectFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(id)).fetchOne();
+        if (existing == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+
+        if (existing.getPhase() != null && req.getFormat() != null
+                && !req.getFormat().equals(existing.getFormat())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot change format after tournament has started");
+        }
+
+        String effectiveFormat = req.getFormat() != null ? req.getFormat() : existing.getFormat();
+        Long effectiveType = req.getTournamentTypeId() != null ? req.getTournamentTypeId() : existing.getTournamentType();
+        validateFormat(effectiveFormat, effectiveType);
+
         int updated = dsl.update(TOURNAMENT)
                 .set(TOURNAMENT.NAME, req.getName())
                 .set(TOURNAMENT.START_DATE, req.getStartDate())
+                .set(TOURNAMENT.END_DATE, req.getEndDate())
                 .set(TOURNAMENT.CAPACITY, req.getCapacity())
                 .set(TOURNAMENT.PRIZE_MONEY, req.getPrizeMoney())
                 .set(TOURNAMENT.TOURNAMENT_STATUS, req.getTournamentStatusId())
                 .set(TOURNAMENT.TOURNAMENT_TYPE, req.getTournamentTypeId())
-                .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now())
+                .set(TOURNAMENT.FORMAT, req.getFormat())
+                .set(TOURNAMENT.TOTAL_ROUNDS, req.getTotalRounds())
+                .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now(ZONE))
                 .where(TOURNAMENT.ID.eq(id))
                 .execute();
-        if (updated == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
-        }
+
+        if (updated == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
         return findById(id);
     }
 
@@ -132,16 +176,37 @@ public class TournamentService {
         String objectName = minioService.upload(FOLDER, file);
         dsl.update(TOURNAMENT)
                 .set(TOURNAMENT.LOGO, objectName)
-                .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now())
+                .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now(ZONE))
                 .where(TOURNAMENT.ID.eq(id))
                 .execute();
         return findById(id);
     }
 
+    public void activateTournament(Long id) {
+        dsl.update(TOURNAMENT)
+                .set(TOURNAMENT.TOURNAMENT_STATUS, STATUS_ACTIVE)
+                .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now(ZONE))
+                .where(TOURNAMENT.ID.eq(id))
+                .execute();
+    }
+
     public void delete(Long id) {
         int deleted = dsl.deleteFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(id)).execute();
-        if (deleted == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+        if (deleted == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+    }
+
+    private void validateFormat(String format, Long tournamentTypeId) {
+        if (format != null && !VALID_FORMATS.contains(format)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid format. Allowed: SINGLE_ELIMINATION, SWISS, EKPL");
+        }
+        if (FORMAT_EKPL.equals(format) && !TYPE_EKPL.equals(tournamentTypeId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "EKPL format is only allowed for tournament type 5 (eKPL)");
+        }
+        if (TYPE_EKPL.equals(tournamentTypeId) && format != null && !FORMAT_EKPL.equals(format)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Tournament type eKPL (id=5) must use EKPL format");
         }
     }
 

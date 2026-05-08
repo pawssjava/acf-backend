@@ -47,6 +47,26 @@ public class AuthService {
         smsService.sendCode(phone);
     }
 
+    public void verifySms(String phone, String code) {
+        if (!smsService.verifyCode(phone, code)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid SMS code");
+        }
+    }
+
+    public void checkPhoneAvailable(String phone) {
+        boolean exists = dsl.fetchExists(USER, USER.PHONE_NUMBER.eq(Long.parseLong(phone)));
+        if (exists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Phone number already registered");
+        }
+    }
+
+    public void checkUsernameAvailable(String username) {
+        boolean exists = dsl.fetchExists(USER, USER.USERNAME.eq(username));
+        if (exists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
+        }
+    }
+
     public TokenResponse login(String username, String password) {
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("client_id", clientId);
@@ -75,8 +95,8 @@ public class AuthService {
     }
 
     public UserDto register(RegisterRequest req) {
-        if (!smsService.verifyCode(req.getPhone(), req.getCode())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid SMS code");
+        if (!smsService.isVerified(req.getPhone())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phone number not verified");
         }
 
         createKeycloakUser(req);
@@ -113,8 +133,8 @@ public class AuthService {
     }
 
     public void resetPassword(ForgotPasswordRequest req) {
-        if (!smsService.verifyCode(req.getPhone(), req.getCode())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid SMS code");
+        if (!smsService.isVerified(req.getPhone())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phone number not verified");
         }
 
         String username = dsl.selectFrom(USER)
