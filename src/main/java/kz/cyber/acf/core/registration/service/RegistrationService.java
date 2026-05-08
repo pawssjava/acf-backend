@@ -16,8 +16,13 @@ import static group.bi.postsales.database.Tables.*;
 public class RegistrationService {
 
     private final DefaultDSLContext dsl;
+    private final RegistrationLogService registrationLogService;
 
-    public ParticipantDto register(Long tournamentId, Long userId) {
+    public ParticipantDto register(Long tournamentId, Long userId, String psn) {
+        if (psn == null || psn.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PSN is mandatory");
+        }
+
         var tournament = dsl.selectFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(tournamentId)).fetchOne();
         if (tournament == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
@@ -46,7 +51,10 @@ public class RegistrationService {
         dsl.insertInto(TOURNAMENT_REGISTRATION)
                 .set(TOURNAMENT_REGISTRATION.TOURNAMENT_ID, tournamentId)
                 .set(TOURNAMENT_REGISTRATION.USER_ID, userId)
+                .set(TOURNAMENT_REGISTRATION.PSN, psn.trim())
                 .execute();
+
+        registrationLogService.log(tournamentId, userId, RegistrationLogService.ACTION_REGISTER, psn.trim());
 
         return getParticipants(tournamentId).stream()
                 .filter(p -> p.getUserId().equals(userId))
@@ -67,6 +75,12 @@ public class RegistrationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unregistration is only allowed for upcoming tournaments");
         }
 
+        String psn = dsl.select(TOURNAMENT_REGISTRATION.PSN)
+                .from(TOURNAMENT_REGISTRATION)
+                .where(TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId)
+                        .and(TOURNAMENT_REGISTRATION.USER_ID.eq(userId)))
+                .fetchOneInto(String.class);
+
         int deleted = dsl.deleteFrom(TOURNAMENT_REGISTRATION)
                 .where(TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId)
                         .and(TOURNAMENT_REGISTRATION.USER_ID.eq(userId)))
@@ -74,6 +88,8 @@ public class RegistrationService {
         if (deleted == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Registration not found");
         }
+
+        registrationLogService.log(tournamentId, userId, RegistrationLogService.ACTION_UNREGISTER, psn);
     }
 
     public List<ParticipantDto> getParticipants(Long tournamentId) {
@@ -84,7 +100,8 @@ public class RegistrationService {
                         USER.USERNAME,
                         USER.FIRST_NAME,
                         USER.LAST_NAME,
-                        TOURNAMENT_REGISTRATION.REGISTERED_DATE
+                        TOURNAMENT_REGISTRATION.REGISTERED_DATE,
+                        TOURNAMENT_REGISTRATION.PSN
                 )
                 .from(TOURNAMENT_REGISTRATION)
                 .join(USER).on(TOURNAMENT_REGISTRATION.USER_ID.eq(USER.ID))
@@ -97,7 +114,8 @@ public class RegistrationService {
                         r.get(USER.USERNAME),
                         r.get(USER.FIRST_NAME),
                         r.get(USER.LAST_NAME),
-                        r.get(TOURNAMENT_REGISTRATION.REGISTERED_DATE)
+                        r.get(TOURNAMENT_REGISTRATION.REGISTERED_DATE),
+                        r.get(TOURNAMENT_REGISTRATION.PSN)
                 ));
     }
 }

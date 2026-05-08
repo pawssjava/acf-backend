@@ -46,7 +46,7 @@ public class RegistrationController {
             @Parameter(description = "Tournament ID") @PathVariable Long tournamentId,
             @RequestBody RegistrationRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(registrationService.register(tournamentId, req.getUserId()));
+                .body(registrationService.register(tournamentId, req.getUserId(), req.getPsn()));
     }
 
     @Operation(

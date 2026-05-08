@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kz.cyber.acf.core.user.dto.PageResponse;
+import kz.cyber.acf.core.user.dto.PlayerTournamentHistoryDto;
 import kz.cyber.acf.core.user.dto.UpdateUserRequest;
 import kz.cyber.acf.core.user.dto.UserDto;
 import kz.cyber.acf.core.user.service.UserService;
@@ -77,6 +79,22 @@ public class UserController {
             @Parameter(description = "User ID") @PathVariable Long id,
             @RequestParam("file") MultipartFile file) {
         return userService.uploadPhoto(id, file);
+    }
+
+    @Operation(
+            summary = "Get player's tournament history",
+            description = "Returns finished tournaments the player participated in, ordered by end date descending. Includes the player's final place and score in each tournament.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Tournament history returned"),
+                    @ApiResponse(responseCode = "404", description = "User not found")
+            }
+    )
+    @GetMapping("/{id}/tournaments")
+    public PageResponse<PlayerTournamentHistoryDto> getTournamentHistory(
+            @Parameter(description = "User ID") @PathVariable Long id,
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
+        return userService.getTournamentHistory(id, page, size);
     }
 
     @Operation(

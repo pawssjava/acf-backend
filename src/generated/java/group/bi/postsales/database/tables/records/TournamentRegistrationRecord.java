@@ -76,6 +76,20 @@ public class TournamentRegistrationRecord extends UpdatableRecordImpl<Tournament
         return (OffsetDateTime) get(3);
     }
 
+    /**
+     * Setter for <code>acf.tournament_registration.psn</code>.
+     */
+    public void setPsn(String value) {
+        set(4, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament_registration.psn</code>.
+     */
+    public String getPsn() {
+        return (String) get(4);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -99,13 +113,14 @@ public class TournamentRegistrationRecord extends UpdatableRecordImpl<Tournament
     /**
      * Create a detached, initialised TournamentRegistrationRecord
      */
-    public TournamentRegistrationRecord(Long id, Long tournamentId, Long userId, OffsetDateTime registeredDate) {
+    public TournamentRegistrationRecord(Long id, Long tournamentId, Long userId, OffsetDateTime registeredDate, String psn) {
         super(TournamentRegistration.TOURNAMENT_REGISTRATION);
 
         setId(id);
         setTournamentId(tournamentId);
         setUserId(userId);
         setRegisteredDate(registeredDate);
+        setPsn(psn);
         resetTouchedOnNotNull();
     }
 }

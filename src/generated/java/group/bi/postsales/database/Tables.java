@@ -10,6 +10,7 @@ import group.bi.postsales.database.tables.News;
 import group.bi.postsales.database.tables.Tournament;
 import group.bi.postsales.database.tables.TournamentMatch;
 import group.bi.postsales.database.tables.TournamentRegistration;
+import group.bi.postsales.database.tables.TournamentRegistrationLog;
 import group.bi.postsales.database.tables.TournamentResult;
 import group.bi.postsales.database.tables.User;
 
@@ -49,6 +50,11 @@ public class Tables {
      * The table <code>acf.tournament_registration</code>.
      */
     public static final TournamentRegistration TOURNAMENT_REGISTRATION = TournamentRegistration.TOURNAMENT_REGISTRATION;
+
+    /**
+     * The table <code>acf.tournament_registration_log</code>.
+     */
+    public static final TournamentRegistrationLog TOURNAMENT_REGISTRATION_LOG = TournamentRegistrationLog.TOURNAMENT_REGISTRATION_LOG;
 
     /**
      * The table <code>acf.tournament_result</code>.

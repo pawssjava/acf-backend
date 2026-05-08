@@ -73,6 +73,11 @@ public class TournamentRegistration extends TableImpl<TournamentRegistrationReco
      */
     public final TableField<TournamentRegistrationRecord, OffsetDateTime> REGISTERED_DATE = createField(DSL.name("registered_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
+    /**
+     * The column <code>acf.tournament_registration.psn</code>.
+     */
+    public final TableField<TournamentRegistrationRecord, String> PSN = createField(DSL.name("psn"), SQLDataType.VARCHAR.nullable(false), this, "");
+
     private TournamentRegistration(Name alias, Table<TournamentRegistrationRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

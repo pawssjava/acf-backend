@@ -25,8 +25,9 @@ public class TournamentService {
     private static final String FOLDER           = "tournaments";
     private static final String FORMAT_EKPL      = "EKPL";
     private static final Long   TYPE_EKPL        = 5L;
-    private static final Long   STATUS_UPCOMING  = 2L;
-    private static final Long   STATUS_ACTIVE    = 1L;
+    private static final Long   STATUS_UPCOMING   = 2L;
+    private static final Long   STATUS_ACTIVE     = 1L;
+    private static final Long   STATUS_COMPLETED  = 3L;
     private static final Set<String> VALID_FORMATS = Set.of("SINGLE_ELIMINATION", "SWISS", "EKPL");
 
     private final DefaultDSLContext dsl;
@@ -143,6 +144,8 @@ public class TournamentService {
         var existing = dsl.selectFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(id)).fetchOne();
         if (existing == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
 
+        rejectIfNotEditable(existing.getTournamentStatus());
+
         if (existing.getPhase() != null && req.getFormat() != null
                 && !req.getFormat().equals(existing.getFormat())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -172,7 +175,9 @@ public class TournamentService {
     }
 
     public TournamentDto uploadLogo(Long id, MultipartFile file) {
-        findById(id);
+        var existing = dsl.selectFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(id)).fetchOne();
+        if (existing == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+        rejectIfNotEditable(existing.getTournamentStatus());
         String objectName = minioService.upload(FOLDER, file);
         dsl.update(TOURNAMENT)
                 .set(TOURNAMENT.LOGO, objectName)
@@ -193,6 +198,13 @@ public class TournamentService {
     public void delete(Long id) {
         int deleted = dsl.deleteFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(id)).execute();
         if (deleted == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+    }
+
+    private void rejectIfNotEditable(Long statusId) {
+        if (STATUS_ACTIVE.equals(statusId) || STATUS_COMPLETED.equals(statusId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Tournament cannot be edited after it has started or finished");
+        }
     }
 
     private void validateFormat(String format, Long tournamentTypeId) {
