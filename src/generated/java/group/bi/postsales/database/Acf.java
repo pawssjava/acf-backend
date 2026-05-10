@@ -4,6 +4,7 @@
 package group.bi.postsales.database;
 
 
+import group.bi.postsales.database.tables.DCity;
 import group.bi.postsales.database.tables.DTournamentStatus;
 import group.bi.postsales.database.tables.DTournamentType;
 import group.bi.postsales.database.tables.News;
@@ -37,6 +38,11 @@ public class Acf extends SchemaImpl {
      * The reference instance of <code>acf</code>
      */
     public static final Acf ACF = new Acf();
+
+    /**
+     * The table <code>acf.d_city</code>.
+     */
+    public final DCity D_CITY = DCity.D_CITY;
 
     /**
      * The table <code>acf.d_tournament_status</code>.
@@ -109,6 +115,7 @@ public class Acf extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.asList(
+            DCity.D_CITY,
             DTournamentStatus.D_TOURNAMENT_STATUS,
             DTournamentType.D_TOURNAMENT_TYPE,
             News.NEWS,

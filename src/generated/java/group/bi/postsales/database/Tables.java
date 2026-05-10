@@ -4,6 +4,7 @@
 package group.bi.postsales.database;
 
 
+import group.bi.postsales.database.tables.DCity;
 import group.bi.postsales.database.tables.DTournamentStatus;
 import group.bi.postsales.database.tables.DTournamentType;
 import group.bi.postsales.database.tables.News;
@@ -22,6 +23,11 @@ import group.bi.postsales.database.tables.User;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes", "this-escape" })
 public class Tables {
+
+    /**
+     * The table <code>acf.d_city</code>.
+     */
+    public static final DCity D_CITY = DCity.D_CITY;
 
     /**
      * The table <code>acf.d_tournament_status</code>.

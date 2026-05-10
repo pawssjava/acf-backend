@@ -4,6 +4,7 @@
 package group.bi.postsales.database;
 
 
+import group.bi.postsales.database.tables.DCity;
 import group.bi.postsales.database.tables.DTournamentStatus;
 import group.bi.postsales.database.tables.DTournamentType;
 import group.bi.postsales.database.tables.News;
@@ -15,6 +16,7 @@ import group.bi.postsales.database.tables.TournamentRegistration;
 import group.bi.postsales.database.tables.TournamentRegistrationLog;
 import group.bi.postsales.database.tables.TournamentResult;
 import group.bi.postsales.database.tables.User;
+import group.bi.postsales.database.tables.records.DCityRecord;
 import group.bi.postsales.database.tables.records.DTournamentStatusRecord;
 import group.bi.postsales.database.tables.records.DTournamentTypeRecord;
 import group.bi.postsales.database.tables.records.NewsRecord;
@@ -43,6 +45,7 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<DCityRecord> D_CITY_PKEY = Internal.createUniqueKey(DCity.D_CITY, DSL.name("d_city_pkey"), new TableField[] { DCity.D_CITY.ID }, true);
     public static final UniqueKey<DTournamentStatusRecord> D_TOURNAMENT_STATUS_PKEY = Internal.createUniqueKey(DTournamentStatus.D_TOURNAMENT_STATUS, DSL.name("d_tournament_status_pkey"), new TableField[] { DTournamentStatus.D_TOURNAMENT_STATUS.ID }, true);
     public static final UniqueKey<DTournamentTypeRecord> D_TOURNAMENT_TYPE_PKEY = Internal.createUniqueKey(DTournamentType.D_TOURNAMENT_TYPE, DSL.name("d_tournament_type_pkey"), new TableField[] { DTournamentType.D_TOURNAMENT_TYPE.ID }, true);
     public static final UniqueKey<NewsRecord> NEWS_PKEY = Internal.createUniqueKey(News.NEWS, DSL.name("news_pkey"), new TableField[] { News.NEWS.ID }, true);
