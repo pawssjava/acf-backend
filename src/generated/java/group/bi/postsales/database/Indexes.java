@@ -4,6 +4,7 @@
 package group.bi.postsales.database;
 
 
+import group.bi.postsales.database.tables.SmsLog;
 import group.bi.postsales.database.tables.TournamentRegistrationLog;
 
 import org.jooq.Index;
@@ -23,4 +24,5 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     public static final Index IDX_REG_LOG_TOURNAMENT_DATE = Internal.createIndex(DSL.name("idx_reg_log_tournament_date"), TournamentRegistrationLog.TOURNAMENT_REGISTRATION_LOG, new OrderField[] { TournamentRegistrationLog.TOURNAMENT_REGISTRATION_LOG.TOURNAMENT_ID, TournamentRegistrationLog.TOURNAMENT_REGISTRATION_LOG.CREATED_DATE.desc() }, false);
+    public static final Index IDX_SMS_LOG_PHONE_SENT = Internal.createIndex(DSL.name("idx_sms_log_phone_sent"), SmsLog.SMS_LOG, new OrderField[] { SmsLog.SMS_LOG.PHONE_NUMBER, SmsLog.SMS_LOG.SENT_AT.desc() }, false);
 }

@@ -7,6 +7,7 @@ package group.bi.postsales.database;
 import group.bi.postsales.database.tables.DTournamentStatus;
 import group.bi.postsales.database.tables.DTournamentType;
 import group.bi.postsales.database.tables.News;
+import group.bi.postsales.database.tables.SmsLog;
 import group.bi.postsales.database.tables.Tournament;
 import group.bi.postsales.database.tables.TournamentMatch;
 import group.bi.postsales.database.tables.TournamentRegistration;
@@ -35,6 +36,11 @@ public class Tables {
      * The table <code>acf.news</code>.
      */
     public static final News NEWS = News.NEWS;
+
+    /**
+     * The table <code>acf.sms_log</code>.
+     */
+    public static final SmsLog SMS_LOG = SmsLog.SMS_LOG;
 
     /**
      * The table <code>acf.tournament</code>.

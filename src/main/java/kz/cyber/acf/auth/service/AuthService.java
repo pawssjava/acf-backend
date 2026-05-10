@@ -1,5 +1,6 @@
 package kz.cyber.acf.auth.service;
 
+import kz.cyber.acf.auth.SmsAction;
 import kz.cyber.acf.auth.client.KeycloakAdminClient;
 import kz.cyber.acf.auth.client.KeycloakTokenClient;
 import kz.cyber.acf.auth.dto.ForgotPasswordRequest;
@@ -44,7 +45,7 @@ public class AuthService {
     private String realm;
 
     public void sendSms(String phone) {
-        smsService.sendCode(phone);
+        smsService.sendCode(phone, SmsAction.REGISTRATION);
     }
 
     public void verifySms(String phone, String code) {
@@ -129,7 +130,7 @@ public class AuthService {
                 .fetchOptional()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        smsService.sendCode(phone);
+        smsService.sendCode(phone, SmsAction.FORGOT_PASSWORD);
     }
 
     public void resetPassword(ForgotPasswordRequest req) {
