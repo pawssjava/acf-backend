@@ -33,8 +33,8 @@ public class TournamentService {
     private final DefaultDSLContext dsl;
     private final MinioService minioService;
 
-    public List<TournamentDto> findAll() {
-        return dsl.select(
+    public List<TournamentDto> findAll(Long tournamentTypeId) {
+        var query = dsl.select(
                         TOURNAMENT.ID,
                         TOURNAMENT.NAME,
                         TOURNAMENT.LOGO,
@@ -55,8 +55,11 @@ public class TournamentService {
                 .from(TOURNAMENT)
                 .leftJoin(D_TOURNAMENT_STATUS).on(TOURNAMENT.TOURNAMENT_STATUS.eq(D_TOURNAMENT_STATUS.ID))
                 .leftJoin(D_TOURNAMENT_TYPE).on(TOURNAMENT.TOURNAMENT_TYPE.eq(D_TOURNAMENT_TYPE.ID))
-                .orderBy(TOURNAMENT.CREATED_DATE.desc())
-                .fetch(r -> new TournamentDto(
+                .where(tournamentTypeId == null
+                        ? org.jooq.impl.DSL.noCondition()
+                        : TOURNAMENT.TOURNAMENT_TYPE.eq(tournamentTypeId))
+                .orderBy(TOURNAMENT.CREATED_DATE.desc());
+        return query.fetch(r -> new TournamentDto(
                         r.get(TOURNAMENT.ID),
                         r.get(TOURNAMENT.NAME),
                         resolveUrl(r.get(TOURNAMENT.LOGO)),

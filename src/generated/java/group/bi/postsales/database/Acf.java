@@ -7,6 +7,7 @@ package group.bi.postsales.database;
 import group.bi.postsales.database.tables.DTournamentStatus;
 import group.bi.postsales.database.tables.DTournamentType;
 import group.bi.postsales.database.tables.News;
+import group.bi.postsales.database.tables.Partner;
 import group.bi.postsales.database.tables.SmsLog;
 import group.bi.postsales.database.tables.Tournament;
 import group.bi.postsales.database.tables.TournamentMatch;
@@ -51,6 +52,11 @@ public class Acf extends SchemaImpl {
      * The table <code>acf.news</code>.
      */
     public final News NEWS = News.NEWS;
+
+    /**
+     * The table <code>acf.partner</code>.
+     */
+    public final Partner PARTNER = Partner.PARTNER;
 
     /**
      * The table <code>acf.sms_log</code>.
@@ -106,6 +112,7 @@ public class Acf extends SchemaImpl {
             DTournamentStatus.D_TOURNAMENT_STATUS,
             DTournamentType.D_TOURNAMENT_TYPE,
             News.NEWS,
+            Partner.PARTNER,
             SmsLog.SMS_LOG,
             Tournament.TOURNAMENT,
             TournamentMatch.TOURNAMENT_MATCH,

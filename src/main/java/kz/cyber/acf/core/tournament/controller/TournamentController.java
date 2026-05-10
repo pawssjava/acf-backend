@@ -24,10 +24,11 @@ public class TournamentController {
 
     private final TournamentService tournamentService;
 
-    @Operation(summary = "List all tournaments", description = "Returns all tournaments ordered by creation date descending, with status and type names resolved.")
+    @Operation(summary = "List all tournaments", description = "Returns all tournaments ordered by creation date descending, with status and type names resolved. Optionally filter by tournament_type_id.")
     @GetMapping
-    public List<TournamentDto> findAll() {
-        return tournamentService.findAll();
+    public List<TournamentDto> findAll(
+            @Parameter(description = "Filter by tournament type ID") @RequestParam(required = false) Long tournamentTypeId) {
+        return tournamentService.findAll(tournamentTypeId);
     }
 
     @Operation(
