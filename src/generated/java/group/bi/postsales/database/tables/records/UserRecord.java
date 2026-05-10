@@ -161,6 +161,62 @@ public class UserRecord extends UpdatableRecordImpl<UserRecord> {
         return (OffsetDateTime) get(9);
     }
 
+    /**
+     * Setter for <code>acf.user.city_id</code>.
+     */
+    public void setCityId(Long value) {
+        set(10, value);
+    }
+
+    /**
+     * Getter for <code>acf.user.city_id</code>.
+     */
+    public Long getCityId() {
+        return (Long) get(10);
+    }
+
+    /**
+     * Setter for <code>acf.user.is_verified</code>.
+     */
+    public void setIsVerified(Boolean value) {
+        set(11, value);
+    }
+
+    /**
+     * Getter for <code>acf.user.is_verified</code>.
+     */
+    public Boolean getIsVerified() {
+        return (Boolean) get(11);
+    }
+
+    /**
+     * Setter for <code>acf.user.verification_document</code>.
+     */
+    public void setVerificationDocument(String value) {
+        set(12, value);
+    }
+
+    /**
+     * Getter for <code>acf.user.verification_document</code>.
+     */
+    public String getVerificationDocument() {
+        return (String) get(12);
+    }
+
+    /**
+     * Setter for <code>acf.user.club_id</code>.
+     */
+    public void setClubId(Long value) {
+        set(13, value);
+    }
+
+    /**
+     * Getter for <code>acf.user.club_id</code>.
+     */
+    public Long getClubId() {
+        return (Long) get(13);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -184,7 +240,7 @@ public class UserRecord extends UpdatableRecordImpl<UserRecord> {
     /**
      * Create a detached, initialised UserRecord
      */
-    public UserRecord(Long id, String username, Long phoneNumber, String firstName, String lastName, LocalDate birthDate, Boolean isAdmin, String photo, OffsetDateTime updatedDate, OffsetDateTime createdDate) {
+    public UserRecord(Long id, String username, Long phoneNumber, String firstName, String lastName, LocalDate birthDate, Boolean isAdmin, String photo, OffsetDateTime updatedDate, OffsetDateTime createdDate, Long cityId, Boolean isVerified, String verificationDocument, Long clubId) {
         super(User.USER);
 
         setId(id);
@@ -197,6 +253,10 @@ public class UserRecord extends UpdatableRecordImpl<UserRecord> {
         setPhoto(photo);
         setUpdatedDate(updatedDate);
         setCreatedDate(createdDate);
+        setCityId(cityId);
+        setIsVerified(isVerified);
+        setVerificationDocument(verificationDocument);
+        setClubId(clubId);
         resetTouchedOnNotNull();
     }
 }

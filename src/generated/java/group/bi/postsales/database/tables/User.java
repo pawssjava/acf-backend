@@ -104,6 +104,26 @@ public class User extends TableImpl<UserRecord> {
      */
     public final TableField<UserRecord, OffsetDateTime> CREATED_DATE = createField(DSL.name("created_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
+    /**
+     * The column <code>acf.user.city_id</code>.
+     */
+    public final TableField<UserRecord, Long> CITY_ID = createField(DSL.name("city_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>acf.user.is_verified</code>.
+     */
+    public final TableField<UserRecord, Boolean> IS_VERIFIED = createField(DSL.name("is_verified"), SQLDataType.BOOLEAN.defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>acf.user.verification_document</code>.
+     */
+    public final TableField<UserRecord, String> VERIFICATION_DOCUMENT = createField(DSL.name("verification_document"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>acf.user.club_id</code>.
+     */
+    public final TableField<UserRecord, Long> CLUB_ID = createField(DSL.name("club_id"), SQLDataType.BIGINT, this, "");
+
     private User(Name alias, Table<UserRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

@@ -36,6 +36,14 @@ public class RegistrationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Registration is only allowed for upcoming tournaments");
         }
 
+        Boolean isVerified = dsl.select(USER.IS_VERIFIED)
+                .from(USER)
+                .where(USER.ID.eq(userId))
+                .fetchOneInto(Boolean.class);
+        if (!Boolean.TRUE.equals(isVerified)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Document verification required to register for tournaments");
+        }
+
         boolean alreadyRegistered = dsl.fetchExists(TOURNAMENT_REGISTRATION,
                 TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId)
                         .and(TOURNAMENT_REGISTRATION.USER_ID.eq(userId)));

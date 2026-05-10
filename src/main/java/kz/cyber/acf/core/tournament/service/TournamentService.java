@@ -198,6 +198,14 @@ public class TournamentService {
                 .execute();
     }
 
+    public void completeTournament(Long id) {
+        dsl.update(TOURNAMENT)
+                .set(TOURNAMENT.TOURNAMENT_STATUS, STATUS_COMPLETED)
+                .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now(ZONE))
+                .where(TOURNAMENT.ID.eq(id))
+                .execute();
+    }
+
     public void delete(Long id) {
         int deleted = dsl.deleteFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(id)).execute();
         if (deleted == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");

@@ -36,7 +36,7 @@ management:
       show-details: always
 logging:
   level:
-    root: TRACE
+    root: ${log_level}
 
 application:
   url: ${APP_BASE_URL:asd}

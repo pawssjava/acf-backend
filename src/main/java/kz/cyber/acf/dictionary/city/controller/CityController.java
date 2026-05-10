@@ -19,7 +19,6 @@ import java.util.List;
 @RequestMapping("/api/dictionary/cities")
 @RequiredArgsConstructor
 public class CityController {
-
     private final CityService cityService;
 
     @Operation(summary = "List all cities")

@@ -5,6 +5,7 @@ package group.bi.postsales.database;
 
 
 import group.bi.postsales.database.tables.DCity;
+import group.bi.postsales.database.tables.DClub;
 import group.bi.postsales.database.tables.DTournamentStatus;
 import group.bi.postsales.database.tables.DTournamentType;
 import group.bi.postsales.database.tables.News;
@@ -43,6 +44,11 @@ public class Acf extends SchemaImpl {
      * The table <code>acf.d_city</code>.
      */
     public final DCity D_CITY = DCity.D_CITY;
+
+    /**
+     * The table <code>acf.d_club</code>.
+     */
+    public final DClub D_CLUB = DClub.D_CLUB;
 
     /**
      * The table <code>acf.d_tournament_status</code>.
@@ -116,6 +122,7 @@ public class Acf extends SchemaImpl {
     public final List<Table<?>> getTables() {
         return Arrays.asList(
             DCity.D_CITY,
+            DClub.D_CLUB,
             DTournamentStatus.D_TOURNAMENT_STATUS,
             DTournamentType.D_TOURNAMENT_TYPE,
             News.NEWS,

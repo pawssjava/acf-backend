@@ -1,6 +1,7 @@
 package kz.cyber.acf.core.user.service;
 
 import kz.cyber.acf.core.user.dto.PageResponse;
+import kz.cyber.acf.core.user.dto.PlayerMatchDto;
 import kz.cyber.acf.core.user.dto.PlayerTournamentHistoryDto;
 import kz.cyber.acf.core.user.dto.UpdateUserRequest;
 import kz.cyber.acf.core.user.dto.UserDto;
@@ -12,8 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import org.springframework.http.HttpStatus;
-
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -23,40 +22,59 @@ import static group.bi.postsales.database.Tables.*;
 @RequiredArgsConstructor
 public class UserService {
 
-    private static final String BUCKET = "users";
+    private static final String BUCKET_USERS = "users";
+    private static final String BUCKET_VERIFICATIONS = "verifications";
+    private static final long STATUS_COMPLETED = 3L;
 
     private final DefaultDSLContext dsl;
     private final MinioService minioService;
+    private final KzIdDocumentValidator kzIdDocumentValidator;
 
     public List<UserDto> findAll() {
-        return dsl.selectFrom(USER).fetch(r -> new UserDto(
-                r.getId(), r.getUsername(), r.getPhoneNumber(),
-                r.getFirstName(), r.getLastName(), r.getBirthDate(),
-                r.getIsAdmin(), resolveUrl(r.getPhoto()), r.getCreatedDate(), r.getUpdatedDate()
-        ));
+        return dsl.select(
+                        USER.asterisk(),
+                        D_CITY.NAME_RU.as("city_name_ru"),
+                        D_CITY.NAME_KK.as("city_name_kk"),
+                        D_CITY.NAME_EN.as("city_name_en"),
+                        D_CLUB.NAME_RU.as("club_name_ru")
+                )
+                .from(USER)
+                .leftJoin(D_CITY).on(USER.CITY_ID.eq(D_CITY.ID))
+                .leftJoin(D_CLUB).on(USER.CLUB_ID.eq(D_CLUB.ID))
+                .fetch(r -> mapUser(r));
     }
 
     public UserDto findByUsername(String username) {
-        return dsl.selectFrom(USER)
+        return dsl.select(
+                        USER.asterisk(),
+                        D_CITY.NAME_RU.as("city_name_ru"),
+                        D_CITY.NAME_KK.as("city_name_kk"),
+                        D_CITY.NAME_EN.as("city_name_en"),
+                        D_CLUB.NAME_RU.as("club_name_ru")
+                )
+                .from(USER)
+                .leftJoin(D_CITY).on(USER.CITY_ID.eq(D_CITY.ID))
+                .leftJoin(D_CLUB).on(USER.CLUB_ID.eq(D_CLUB.ID))
                 .where(USER.USERNAME.eq(username))
                 .fetchOptional()
-                .map(r -> new UserDto(
-                        r.getId(), r.getUsername(), r.getPhoneNumber(),
-                        r.getFirstName(), r.getLastName(), r.getBirthDate(),
-                        r.getIsAdmin(), resolveUrl(r.getPhoto()), r.getCreatedDate(), r.getUpdatedDate()
-                ))
+                .map(r -> mapUser(r))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
     public UserDto findById(Long id) {
-        return dsl.selectFrom(USER)
+        return dsl.select(
+                        USER.asterisk(),
+                        D_CITY.NAME_RU.as("city_name_ru"),
+                        D_CITY.NAME_KK.as("city_name_kk"),
+                        D_CITY.NAME_EN.as("city_name_en"),
+                        D_CLUB.NAME_RU.as("club_name_ru")
+                )
+                .from(USER)
+                .leftJoin(D_CITY).on(USER.CITY_ID.eq(D_CITY.ID))
+                .leftJoin(D_CLUB).on(USER.CLUB_ID.eq(D_CLUB.ID))
                 .where(USER.ID.eq(id))
                 .fetchOptional()
-                .map(r -> new UserDto(
-                        r.getId(), r.getUsername(), r.getPhoneNumber(),
-                        r.getFirstName(), r.getLastName(), r.getBirthDate(),
-                        r.getIsAdmin(), resolveUrl(r.getPhoto()), r.getCreatedDate(), r.getUpdatedDate()
-                ))
+                .map(r -> mapUser(r))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
@@ -65,6 +83,8 @@ public class UserService {
                 .set(USER.FIRST_NAME, req.getFirstName())
                 .set(USER.LAST_NAME, req.getLastName())
                 .set(USER.BIRTH_DATE, req.getBirthDate())
+                .set(USER.CITY_ID, req.getCityId())
+                .set(USER.CLUB_ID, req.getClubId())
                 .set(USER.UPDATED_DATE, OffsetDateTime.now())
                 .where(USER.ID.eq(id))
                 .execute();
@@ -76,9 +96,22 @@ public class UserService {
 
     public UserDto uploadPhoto(Long id, MultipartFile file) {
         findById(id);
-        String objectName = minioService.upload(BUCKET, file);
+        String objectName = minioService.upload(BUCKET_USERS, file);
         dsl.update(USER)
                 .set(USER.PHOTO, objectName)
+                .set(USER.UPDATED_DATE, OffsetDateTime.now())
+                .where(USER.ID.eq(id))
+                .execute();
+        return findById(id);
+    }
+
+    public UserDto uploadVerificationDocument(Long id, MultipartFile file) {
+        findById(id);
+        kzIdDocumentValidator.validate(file);
+        String objectName = minioService.upload(BUCKET_VERIFICATIONS, file);
+        dsl.update(USER)
+                .set(USER.VERIFICATION_DOCUMENT, objectName)
+                .set(USER.IS_VERIFIED, true)
                 .set(USER.UPDATED_DATE, OffsetDateTime.now())
                 .where(USER.ID.eq(id))
                 .execute();
@@ -101,8 +134,6 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
     }
-
-    private static final long STATUS_COMPLETED = 3L;
 
     public PageResponse<PlayerTournamentHistoryDto> getTournamentHistory(Long userId, int page, int size) {
         findById(userId);
@@ -156,6 +187,97 @@ public class UserService {
 
         int totalPages = size == 0 ? 1 : (int) Math.ceil((double) total / size);
         return new PageResponse<>(content, page, size, total, totalPages);
+    }
+
+    public PageResponse<PlayerMatchDto> getMatchHistory(Long userId, int page, int size) {
+        findById(userId);
+
+        int offset = page * size;
+
+        var condition = TOURNAMENT_MATCH.PARTICIPANT1_ID.eq(userId)
+                .or(TOURNAMENT_MATCH.PARTICIPANT2_ID.eq(userId))
+                .and(TOURNAMENT_MATCH.STATUS.eq("COMPLETED"));
+
+        long total = dsl.selectCount()
+                .from(TOURNAMENT_MATCH)
+                .where(condition)
+                .fetchOne(0, Long.class);
+
+        var P1 = USER.as("p1");
+        var P2 = USER.as("p2");
+
+        List<PlayerMatchDto> content = dsl.select(
+                        TOURNAMENT_MATCH.ID,
+                        TOURNAMENT_MATCH.TOURNAMENT_ID,
+                        TOURNAMENT.NAME.as("tournament_name"),
+                        TOURNAMENT_MATCH.PARTICIPANT1_ID,
+                        TOURNAMENT_MATCH.PARTICIPANT2_ID,
+                        TOURNAMENT_MATCH.SCORE1,
+                        TOURNAMENT_MATCH.SCORE2,
+                        TOURNAMENT_MATCH.WINNER_ID,
+                        TOURNAMENT_MATCH.STATUS,
+                        TOURNAMENT_MATCH.UPDATED_DATE,
+                        P1.USERNAME.as("p1_username"),
+                        P1.PHOTO.as("p1_photo"),
+                        P2.USERNAME.as("p2_username"),
+                        P2.PHOTO.as("p2_photo")
+                )
+                .from(TOURNAMENT_MATCH)
+                .join(TOURNAMENT).on(TOURNAMENT_MATCH.TOURNAMENT_ID.eq(TOURNAMENT.ID))
+                .leftJoin(P1).on(TOURNAMENT_MATCH.PARTICIPANT1_ID.eq(P1.ID))
+                .leftJoin(P2).on(TOURNAMENT_MATCH.PARTICIPANT2_ID.eq(P2.ID))
+                .where(condition)
+                .orderBy(TOURNAMENT_MATCH.UPDATED_DATE.desc())
+                .limit(size)
+                .offset(offset)
+                .fetch(r -> {
+                    boolean isP1 = userId.equals(r.get(TOURNAMENT_MATCH.PARTICIPANT1_ID));
+                    Long opponentId = isP1
+                            ? r.get(TOURNAMENT_MATCH.PARTICIPANT2_ID)
+                            : r.get(TOURNAMENT_MATCH.PARTICIPANT1_ID);
+                    String opponentUsername = isP1
+                            ? r.get("p2_username", String.class)
+                            : r.get("p1_username", String.class);
+                    String opponentPhoto = isP1
+                            ? resolveUrl(r.get("p2_photo", String.class))
+                            : resolveUrl(r.get("p1_photo", String.class));
+                    Integer myScore = isP1 ? r.get(TOURNAMENT_MATCH.SCORE1) : r.get(TOURNAMENT_MATCH.SCORE2);
+                    Integer opponentScore = isP1 ? r.get(TOURNAMENT_MATCH.SCORE2) : r.get(TOURNAMENT_MATCH.SCORE1);
+
+                    Long winnerId = r.get(TOURNAMENT_MATCH.WINNER_ID);
+                    String result = winnerId == null ? "DRAW"
+                            : winnerId.equals(userId) ? "WIN" : "LOSS";
+
+                    return new PlayerMatchDto(
+                            r.get(TOURNAMENT_MATCH.ID),
+                            r.get(TOURNAMENT_MATCH.TOURNAMENT_ID),
+                            r.get("tournament_name", String.class),
+                            opponentId,
+                            opponentUsername,
+                            opponentPhoto,
+                            myScore != null ? myScore : 0,
+                            opponentScore != null ? opponentScore : 0,
+                            result,
+                            r.get(TOURNAMENT_MATCH.STATUS),
+                            r.get(TOURNAMENT_MATCH.UPDATED_DATE)
+                    );
+                });
+
+        int totalPages = size == 0 ? 1 : (int) Math.ceil((double) total / size);
+        return new PageResponse<>(content, page, size, total, totalPages);
+    }
+
+    private UserDto mapUser(org.jooq.Record r) {
+        return new UserDto(
+                r.get(USER.ID), r.get(USER.USERNAME), r.get(USER.PHONE_NUMBER),
+                r.get(USER.FIRST_NAME), r.get(USER.LAST_NAME), r.get(USER.BIRTH_DATE),
+                r.get(USER.IS_ADMIN), resolveUrl(r.get(USER.PHOTO)),
+                r.get(USER.CITY_ID), r.get("city_name_ru", String.class),
+                r.get("city_name_kk", String.class), r.get("city_name_en", String.class),
+                r.get(USER.IS_VERIFIED),
+                r.get(USER.CLUB_ID), r.get("club_name_ru", String.class),
+                r.get(USER.CREATED_DATE), r.get(USER.UPDATED_DATE)
+        );
     }
 
     private String resolveUrl(String objectName) {

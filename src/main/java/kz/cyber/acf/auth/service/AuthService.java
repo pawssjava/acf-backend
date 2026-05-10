@@ -133,6 +133,25 @@ public class AuthService {
         smsService.sendCode(phone, SmsAction.FORGOT_PASSWORD);
     }
 
+    public void changePassword(String username, String currentPassword, String newPassword) {
+        try {
+            login(username, currentPassword);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current password is incorrect");
+        }
+
+        String adminToken = "Bearer " + adminToken().getAccessToken();
+        List<KeycloakUserResponse> users = keycloakAdminClient.findUsers(adminToken, realm, username, true);
+        if (users.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Keycloak user not found");
+        }
+
+        keycloakAdminClient.resetPassword(
+                adminToken, realm, users.get(0).getId(),
+                new KeycloakPasswordResetRequest("password", newPassword, false)
+        );
+    }
+
     public void resetPassword(ForgotPasswordRequest req) {
         if (!smsService.isVerified(req.getPhone())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phone number not verified");

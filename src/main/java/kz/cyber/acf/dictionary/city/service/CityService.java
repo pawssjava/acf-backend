@@ -21,6 +21,7 @@ public class CityService {
 
     public List<CityDto> findAll() {
         return dsl.selectFrom(D_CITY)
+                .where(D_CITY.IS_ACTIVE.isTrue())
                 .fetch(r -> new CityDto(r.getId(), r.getNameRu(), r.getNameKk(), r.getNameEn(),
                         r.getIsActive(), r.getCreatedDate(), r.getUpdatedDate()));
     }

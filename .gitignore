@@ -35,3 +35,4 @@ build/
 Caddyfile
 docker-compose.yml
 Dockerfile
+settings.local.json

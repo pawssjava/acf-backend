@@ -8,4 +8,6 @@ public class UpdateUserRequest {
     private String firstName;
     private String lastName;
     private LocalDate birthDate;
+    private Long cityId;
+    private Long clubId;
 }

@@ -7,6 +7,7 @@ import kz.cyber.acf.core.tournament.match.dto.*;
 import kz.cyber.acf.core.tournament.service.TournamentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDSLContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -83,7 +84,7 @@ public class TournamentMatchService {
         if (!FORMAT_SWISS.equals(tournament.getFormat())) throw badRequest("Tournament is not SWISS format");
         if (!PHASE_SWISS.equals(tournament.getPhase())) throw badRequest("Tournament is not in Swiss phase");
 
-        Integer currentRound = dsl.select(TOURNAMENT_MATCH.ROUND_NUMBER.max())
+        Integer currentRound = dsl.select(DSL.max(TOURNAMENT_MATCH.ROUND_NUMBER))
                 .from(TOURNAMENT_MATCH)
                 .where(TOURNAMENT_MATCH.TOURNAMENT_ID.eq(tournamentId)
                         .and(TOURNAMENT_MATCH.PHASE.eq(PHASE_SWISS)))
@@ -675,11 +676,29 @@ public class TournamentMatchService {
             }
         }
 
+        // For EKPL: also place regular season participants who did not advance to playoffs
+        boolean hasRegularSeason = dsl.fetchExists(TOURNAMENT_MATCH,
+                TOURNAMENT_MATCH.TOURNAMENT_ID.eq(tournamentId)
+                        .and(TOURNAMENT_MATCH.PHASE.eq(PHASE_REGULAR)));
+        if (hasRegularSeason) {
+            Set<Long> alreadyPlaced = new HashSet<>(dsl.select(TOURNAMENT_RESULT.USER_ID)
+                    .from(TOURNAMENT_RESULT)
+                    .where(TOURNAMENT_RESULT.TOURNAMENT_ID.eq(tournamentId))
+                    .fetch(TOURNAMENT_RESULT.USER_ID));
+            int nextPlace = alreadyPlaced.size() + 1;
+            for (GroupStandingDto standing : computeRegularSeasonStandings(tournamentId)) {
+                if (!alreadyPlaced.contains(standing.getUserId())) {
+                    upsertResult(tournamentId, standing.getUserId(), nextPlace++, now);
+                }
+            }
+        }
+
         dsl.update(TOURNAMENT)
                 .set(TOURNAMENT.PHASE, PHASE_COMPLETED)
                 .set(TOURNAMENT.UPDATED_DATE, now)
                 .where(TOURNAMENT.ID.eq(tournamentId))
                 .execute();
+        tournamentService.completeTournament(tournamentId);
         log.info("Tournament {} completed — results saved", tournamentId);
     }
 
@@ -693,6 +712,7 @@ public class TournamentMatchService {
                 .set(TOURNAMENT.UPDATED_DATE, now)
                 .where(TOURNAMENT.ID.eq(tournamentId))
                 .execute();
+        tournamentService.completeTournament(tournamentId);
         log.info("Swiss tournament {} completed — results saved", tournamentId);
     }
 

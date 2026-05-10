@@ -95,6 +95,13 @@
             <artifactId>minio</artifactId>
             <version>8.5.17</version>
         </dependency>
+
+        <!-- PDF text extraction for KZ ID document validation -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.3</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
