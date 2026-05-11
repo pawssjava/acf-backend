@@ -46,6 +46,7 @@ logging:
   level:
     root: ${log_level:WARN}
     org.flywaydb: INFO
+    org.springframework.web: DEBUG
 
 application:
   url: ${APP_BASE_URL:asd}
