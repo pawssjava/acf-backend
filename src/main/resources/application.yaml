@@ -44,12 +44,13 @@ management:
       show-details: always
 logging:
   level:
-    root: ${log_level:WARN}
+    root: WARN
     org.flywaydb: INFO
     org.springframework.web: DEBUG
+    org.jooq: DEBUG
 
 application:
-  url: ${APP_BASE_URL:asd}
+  url: ${APP_BASE_URL}
   keycloak:
     admin-auth-client-secret: ${ADMIN_AUTH_CLIENT_SECRET}
     admin-auth-client-id: ${ADMIN_AUTH_CLIENT_ID}
