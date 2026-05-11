@@ -45,9 +45,6 @@ management:
 logging:
   level:
     root: WARN
-    org.flywaydb: INFO
-    org.springframework.web: DEBUG
-    org.jooq: DEBUG
 
 application:
   url: ${APP_BASE_URL}
