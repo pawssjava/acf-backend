@@ -95,16 +95,6 @@ public class User extends TableImpl<UserRecord> {
     public final TableField<UserRecord, String> PHOTO = createField(DSL.name("photo"), SQLDataType.VARCHAR, this, "");
 
     /**
-     * The column <code>acf.user.updated_date</code>.
-     */
-    public final TableField<UserRecord, OffsetDateTime> UPDATED_DATE = createField(DSL.name("updated_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
-
-    /**
-     * The column <code>acf.user.created_date</code>.
-     */
-    public final TableField<UserRecord, OffsetDateTime> CREATED_DATE = createField(DSL.name("created_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
-
-    /**
      * The column <code>acf.user.city_id</code>.
      */
     public final TableField<UserRecord, Long> CITY_ID = createField(DSL.name("city_id"), SQLDataType.BIGINT, this, "");
@@ -123,6 +113,16 @@ public class User extends TableImpl<UserRecord> {
      * The column <code>acf.user.club_id</code>.
      */
     public final TableField<UserRecord, Long> CLUB_ID = createField(DSL.name("club_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>acf.user.updated_date</code>.
+     */
+    public final TableField<UserRecord, OffsetDateTime> UPDATED_DATE = createField(DSL.name("updated_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+
+    /**
+     * The column <code>acf.user.created_date</code>.
+     */
+    public final TableField<UserRecord, OffsetDateTime> CREATED_DATE = createField(DSL.name("created_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
     private User(Name alias, Table<UserRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -170,7 +170,7 @@ public class User extends TableImpl<UserRecord> {
 
     @Override
     public List<UniqueKey<UserRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.USER_PK, Keys.USER_USERNAME_KEY);
+        return Arrays.asList(Keys.USER_PHONE_NUMBER_KEY, Keys.USER_USERNAME_KEY);
     }
 
     @Override

@@ -8,6 +8,7 @@ import group.bi.postsales.database.tables.DCity;
 import group.bi.postsales.database.tables.DClub;
 import group.bi.postsales.database.tables.DTournamentStatus;
 import group.bi.postsales.database.tables.DTournamentType;
+import group.bi.postsales.database.tables.FlywaySchemaHistory;
 import group.bi.postsales.database.tables.News;
 import group.bi.postsales.database.tables.Partner;
 import group.bi.postsales.database.tables.SmsLog;
@@ -44,6 +45,11 @@ public class Tables {
      * The table <code>acf.d_tournament_type</code>.
      */
     public static final DTournamentType D_TOURNAMENT_TYPE = DTournamentType.D_TOURNAMENT_TYPE;
+
+    /**
+     * The table <code>acf.flyway_schema_history</code>.
+     */
+    public static final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
 
     /**
      * The table <code>acf.news</code>.

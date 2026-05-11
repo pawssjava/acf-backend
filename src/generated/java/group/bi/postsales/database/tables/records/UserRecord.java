@@ -134,87 +134,87 @@ public class UserRecord extends UpdatableRecordImpl<UserRecord> {
     }
 
     /**
-     * Setter for <code>acf.user.updated_date</code>.
-     */
-    public void setUpdatedDate(OffsetDateTime value) {
-        set(8, value);
-    }
-
-    /**
-     * Getter for <code>acf.user.updated_date</code>.
-     */
-    public OffsetDateTime getUpdatedDate() {
-        return (OffsetDateTime) get(8);
-    }
-
-    /**
-     * Setter for <code>acf.user.created_date</code>.
-     */
-    public void setCreatedDate(OffsetDateTime value) {
-        set(9, value);
-    }
-
-    /**
-     * Getter for <code>acf.user.created_date</code>.
-     */
-    public OffsetDateTime getCreatedDate() {
-        return (OffsetDateTime) get(9);
-    }
-
-    /**
      * Setter for <code>acf.user.city_id</code>.
      */
     public void setCityId(Long value) {
-        set(10, value);
+        set(8, value);
     }
 
     /**
      * Getter for <code>acf.user.city_id</code>.
      */
     public Long getCityId() {
-        return (Long) get(10);
+        return (Long) get(8);
     }
 
     /**
      * Setter for <code>acf.user.is_verified</code>.
      */
     public void setIsVerified(Boolean value) {
-        set(11, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>acf.user.is_verified</code>.
      */
     public Boolean getIsVerified() {
-        return (Boolean) get(11);
+        return (Boolean) get(9);
     }
 
     /**
      * Setter for <code>acf.user.verification_document</code>.
      */
     public void setVerificationDocument(String value) {
-        set(12, value);
+        set(10, value);
     }
 
     /**
      * Getter for <code>acf.user.verification_document</code>.
      */
     public String getVerificationDocument() {
-        return (String) get(12);
+        return (String) get(10);
     }
 
     /**
      * Setter for <code>acf.user.club_id</code>.
      */
     public void setClubId(Long value) {
-        set(13, value);
+        set(11, value);
     }
 
     /**
      * Getter for <code>acf.user.club_id</code>.
      */
     public Long getClubId() {
-        return (Long) get(13);
+        return (Long) get(11);
+    }
+
+    /**
+     * Setter for <code>acf.user.updated_date</code>.
+     */
+    public void setUpdatedDate(OffsetDateTime value) {
+        set(12, value);
+    }
+
+    /**
+     * Getter for <code>acf.user.updated_date</code>.
+     */
+    public OffsetDateTime getUpdatedDate() {
+        return (OffsetDateTime) get(12);
+    }
+
+    /**
+     * Setter for <code>acf.user.created_date</code>.
+     */
+    public void setCreatedDate(OffsetDateTime value) {
+        set(13, value);
+    }
+
+    /**
+     * Getter for <code>acf.user.created_date</code>.
+     */
+    public OffsetDateTime getCreatedDate() {
+        return (OffsetDateTime) get(13);
     }
 
     // -------------------------------------------------------------------------
@@ -240,7 +240,7 @@ public class UserRecord extends UpdatableRecordImpl<UserRecord> {
     /**
      * Create a detached, initialised UserRecord
      */
-    public UserRecord(Long id, String username, Long phoneNumber, String firstName, String lastName, LocalDate birthDate, Boolean isAdmin, String photo, OffsetDateTime updatedDate, OffsetDateTime createdDate, Long cityId, Boolean isVerified, String verificationDocument, Long clubId) {
+    public UserRecord(Long id, String username, Long phoneNumber, String firstName, String lastName, LocalDate birthDate, Boolean isAdmin, String photo, Long cityId, Boolean isVerified, String verificationDocument, Long clubId, OffsetDateTime updatedDate, OffsetDateTime createdDate) {
         super(User.USER);
 
         setId(id);
@@ -251,12 +251,12 @@ public class UserRecord extends UpdatableRecordImpl<UserRecord> {
         setBirthDate(birthDate);
         setIsAdmin(isAdmin);
         setPhoto(photo);
-        setUpdatedDate(updatedDate);
-        setCreatedDate(createdDate);
         setCityId(cityId);
         setIsVerified(isVerified);
         setVerificationDocument(verificationDocument);
         setClubId(clubId);
+        setUpdatedDate(updatedDate);
+        setCreatedDate(createdDate);
         resetTouchedOnNotNull();
     }
 }

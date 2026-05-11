@@ -74,6 +74,11 @@ public class Tournament extends TableImpl<TournamentRecord> {
     public final TableField<TournamentRecord, LocalDate> START_DATE = createField(DSL.name("start_date"), SQLDataType.LOCALDATE, this, "");
 
     /**
+     * The column <code>acf.tournament.end_date</code>.
+     */
+    public final TableField<TournamentRecord, LocalDate> END_DATE = createField(DSL.name("end_date"), SQLDataType.LOCALDATE, this, "");
+
+    /**
      * The column <code>acf.tournament.capacity</code>.
      */
     public final TableField<TournamentRecord, Integer> CAPACITY = createField(DSL.name("capacity"), SQLDataType.INTEGER, this, "");
@@ -94,21 +99,6 @@ public class Tournament extends TableImpl<TournamentRecord> {
     public final TableField<TournamentRecord, Long> TOURNAMENT_TYPE = createField(DSL.name("tournament_type"), SQLDataType.BIGINT, this, "");
 
     /**
-     * The column <code>acf.tournament.updated_date</code>.
-     */
-    public final TableField<TournamentRecord, OffsetDateTime> UPDATED_DATE = createField(DSL.name("updated_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
-
-    /**
-     * The column <code>acf.tournament.created_date</code>.
-     */
-    public final TableField<TournamentRecord, OffsetDateTime> CREATED_DATE = createField(DSL.name("created_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
-
-    /**
-     * The column <code>acf.tournament.end_date</code>.
-     */
-    public final TableField<TournamentRecord, LocalDate> END_DATE = createField(DSL.name("end_date"), SQLDataType.LOCALDATE, this, "");
-
-    /**
      * The column <code>acf.tournament.format</code>.
      */
     public final TableField<TournamentRecord, String> FORMAT = createField(DSL.name("format"), SQLDataType.VARCHAR, this, "");
@@ -122,6 +112,16 @@ public class Tournament extends TableImpl<TournamentRecord> {
      * The column <code>acf.tournament.total_rounds</code>.
      */
     public final TableField<TournamentRecord, Integer> TOTAL_ROUNDS = createField(DSL.name("total_rounds"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>acf.tournament.updated_date</code>.
+     */
+    public final TableField<TournamentRecord, OffsetDateTime> UPDATED_DATE = createField(DSL.name("updated_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+
+    /**
+     * The column <code>acf.tournament.created_date</code>.
+     */
+    public final TableField<TournamentRecord, OffsetDateTime> CREATED_DATE = createField(DSL.name("created_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
     private Tournament(Name alias, Table<TournamentRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

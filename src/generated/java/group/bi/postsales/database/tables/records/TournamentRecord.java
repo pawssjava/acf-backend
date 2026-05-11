@@ -79,143 +79,143 @@ public class TournamentRecord extends UpdatableRecordImpl<TournamentRecord> {
     }
 
     /**
-     * Setter for <code>acf.tournament.capacity</code>.
-     */
-    public void setCapacity(Integer value) {
-        set(4, value);
-    }
-
-    /**
-     * Getter for <code>acf.tournament.capacity</code>.
-     */
-    public Integer getCapacity() {
-        return (Integer) get(4);
-    }
-
-    /**
-     * Setter for <code>acf.tournament.prize_money</code>.
-     */
-    public void setPrizeMoney(BigDecimal value) {
-        set(5, value);
-    }
-
-    /**
-     * Getter for <code>acf.tournament.prize_money</code>.
-     */
-    public BigDecimal getPrizeMoney() {
-        return (BigDecimal) get(5);
-    }
-
-    /**
-     * Setter for <code>acf.tournament.tournament_status</code>.
-     */
-    public void setTournamentStatus(Long value) {
-        set(6, value);
-    }
-
-    /**
-     * Getter for <code>acf.tournament.tournament_status</code>.
-     */
-    public Long getTournamentStatus() {
-        return (Long) get(6);
-    }
-
-    /**
-     * Setter for <code>acf.tournament.tournament_type</code>.
-     */
-    public void setTournamentType(Long value) {
-        set(7, value);
-    }
-
-    /**
-     * Getter for <code>acf.tournament.tournament_type</code>.
-     */
-    public Long getTournamentType() {
-        return (Long) get(7);
-    }
-
-    /**
-     * Setter for <code>acf.tournament.updated_date</code>.
-     */
-    public void setUpdatedDate(OffsetDateTime value) {
-        set(8, value);
-    }
-
-    /**
-     * Getter for <code>acf.tournament.updated_date</code>.
-     */
-    public OffsetDateTime getUpdatedDate() {
-        return (OffsetDateTime) get(8);
-    }
-
-    /**
-     * Setter for <code>acf.tournament.created_date</code>.
-     */
-    public void setCreatedDate(OffsetDateTime value) {
-        set(9, value);
-    }
-
-    /**
-     * Getter for <code>acf.tournament.created_date</code>.
-     */
-    public OffsetDateTime getCreatedDate() {
-        return (OffsetDateTime) get(9);
-    }
-
-    /**
      * Setter for <code>acf.tournament.end_date</code>.
      */
     public void setEndDate(LocalDate value) {
-        set(10, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>acf.tournament.end_date</code>.
      */
     public LocalDate getEndDate() {
-        return (LocalDate) get(10);
+        return (LocalDate) get(4);
+    }
+
+    /**
+     * Setter for <code>acf.tournament.capacity</code>.
+     */
+    public void setCapacity(Integer value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.capacity</code>.
+     */
+    public Integer getCapacity() {
+        return (Integer) get(5);
+    }
+
+    /**
+     * Setter for <code>acf.tournament.prize_money</code>.
+     */
+    public void setPrizeMoney(BigDecimal value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.prize_money</code>.
+     */
+    public BigDecimal getPrizeMoney() {
+        return (BigDecimal) get(6);
+    }
+
+    /**
+     * Setter for <code>acf.tournament.tournament_status</code>.
+     */
+    public void setTournamentStatus(Long value) {
+        set(7, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.tournament_status</code>.
+     */
+    public Long getTournamentStatus() {
+        return (Long) get(7);
+    }
+
+    /**
+     * Setter for <code>acf.tournament.tournament_type</code>.
+     */
+    public void setTournamentType(Long value) {
+        set(8, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.tournament_type</code>.
+     */
+    public Long getTournamentType() {
+        return (Long) get(8);
     }
 
     /**
      * Setter for <code>acf.tournament.format</code>.
      */
     public void setFormat(String value) {
-        set(11, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>acf.tournament.format</code>.
      */
     public String getFormat() {
-        return (String) get(11);
+        return (String) get(9);
     }
 
     /**
      * Setter for <code>acf.tournament.phase</code>.
      */
     public void setPhase(String value) {
-        set(12, value);
+        set(10, value);
     }
 
     /**
      * Getter for <code>acf.tournament.phase</code>.
      */
     public String getPhase() {
-        return (String) get(12);
+        return (String) get(10);
     }
 
     /**
      * Setter for <code>acf.tournament.total_rounds</code>.
      */
     public void setTotalRounds(Integer value) {
-        set(13, value);
+        set(11, value);
     }
 
     /**
      * Getter for <code>acf.tournament.total_rounds</code>.
      */
     public Integer getTotalRounds() {
-        return (Integer) get(13);
+        return (Integer) get(11);
+    }
+
+    /**
+     * Setter for <code>acf.tournament.updated_date</code>.
+     */
+    public void setUpdatedDate(OffsetDateTime value) {
+        set(12, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.updated_date</code>.
+     */
+    public OffsetDateTime getUpdatedDate() {
+        return (OffsetDateTime) get(12);
+    }
+
+    /**
+     * Setter for <code>acf.tournament.created_date</code>.
+     */
+    public void setCreatedDate(OffsetDateTime value) {
+        set(13, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.created_date</code>.
+     */
+    public OffsetDateTime getCreatedDate() {
+        return (OffsetDateTime) get(13);
     }
 
     // -------------------------------------------------------------------------
@@ -241,23 +241,23 @@ public class TournamentRecord extends UpdatableRecordImpl<TournamentRecord> {
     /**
      * Create a detached, initialised TournamentRecord
      */
-    public TournamentRecord(Long id, String name, String logo, LocalDate startDate, Integer capacity, BigDecimal prizeMoney, Long tournamentStatus, Long tournamentType, OffsetDateTime updatedDate, OffsetDateTime createdDate, LocalDate endDate, String format, String phase, Integer totalRounds) {
+    public TournamentRecord(Long id, String name, String logo, LocalDate startDate, LocalDate endDate, Integer capacity, BigDecimal prizeMoney, Long tournamentStatus, Long tournamentType, String format, String phase, Integer totalRounds, OffsetDateTime updatedDate, OffsetDateTime createdDate) {
         super(Tournament.TOURNAMENT);
 
         setId(id);
         setName(name);
         setLogo(logo);
         setStartDate(startDate);
+        setEndDate(endDate);
         setCapacity(capacity);
         setPrizeMoney(prizeMoney);
         setTournamentStatus(tournamentStatus);
         setTournamentType(tournamentType);
-        setUpdatedDate(updatedDate);
-        setCreatedDate(createdDate);
-        setEndDate(endDate);
         setFormat(format);
         setPhase(phase);
         setTotalRounds(totalRounds);
+        setUpdatedDate(updatedDate);
+        setCreatedDate(createdDate);
         resetTouchedOnNotNull();
     }
 }

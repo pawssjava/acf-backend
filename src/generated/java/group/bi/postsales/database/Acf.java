@@ -8,6 +8,7 @@ import group.bi.postsales.database.tables.DCity;
 import group.bi.postsales.database.tables.DClub;
 import group.bi.postsales.database.tables.DTournamentStatus;
 import group.bi.postsales.database.tables.DTournamentType;
+import group.bi.postsales.database.tables.FlywaySchemaHistory;
 import group.bi.postsales.database.tables.News;
 import group.bi.postsales.database.tables.Partner;
 import group.bi.postsales.database.tables.SmsLog;
@@ -59,6 +60,11 @@ public class Acf extends SchemaImpl {
      * The table <code>acf.d_tournament_type</code>.
      */
     public final DTournamentType D_TOURNAMENT_TYPE = DTournamentType.D_TOURNAMENT_TYPE;
+
+    /**
+     * The table <code>acf.flyway_schema_history</code>.
+     */
+    public final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
 
     /**
      * The table <code>acf.news</code>.
@@ -125,6 +131,7 @@ public class Acf extends SchemaImpl {
             DClub.D_CLUB,
             DTournamentStatus.D_TOURNAMENT_STATUS,
             DTournamentType.D_TOURNAMENT_TYPE,
+            FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
             News.NEWS,
             Partner.PARTNER,
             SmsLog.SMS_LOG,

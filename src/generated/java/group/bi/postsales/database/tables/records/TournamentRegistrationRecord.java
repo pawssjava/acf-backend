@@ -63,31 +63,31 @@ public class TournamentRegistrationRecord extends UpdatableRecordImpl<Tournament
     }
 
     /**
-     * Setter for <code>acf.tournament_registration.registered_date</code>.
-     */
-    public void setRegisteredDate(OffsetDateTime value) {
-        set(3, value);
-    }
-
-    /**
-     * Getter for <code>acf.tournament_registration.registered_date</code>.
-     */
-    public OffsetDateTime getRegisteredDate() {
-        return (OffsetDateTime) get(3);
-    }
-
-    /**
      * Setter for <code>acf.tournament_registration.psn</code>.
      */
     public void setPsn(String value) {
-        set(4, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>acf.tournament_registration.psn</code>.
      */
     public String getPsn() {
-        return (String) get(4);
+        return (String) get(3);
+    }
+
+    /**
+     * Setter for <code>acf.tournament_registration.registered_date</code>.
+     */
+    public void setRegisteredDate(OffsetDateTime value) {
+        set(4, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament_registration.registered_date</code>.
+     */
+    public OffsetDateTime getRegisteredDate() {
+        return (OffsetDateTime) get(4);
     }
 
     // -------------------------------------------------------------------------
@@ -113,14 +113,14 @@ public class TournamentRegistrationRecord extends UpdatableRecordImpl<Tournament
     /**
      * Create a detached, initialised TournamentRegistrationRecord
      */
-    public TournamentRegistrationRecord(Long id, Long tournamentId, Long userId, OffsetDateTime registeredDate, String psn) {
+    public TournamentRegistrationRecord(Long id, Long tournamentId, Long userId, String psn, OffsetDateTime registeredDate) {
         super(TournamentRegistration.TOURNAMENT_REGISTRATION);
 
         setId(id);
         setTournamentId(tournamentId);
         setUserId(userId);
-        setRegisteredDate(registeredDate);
         setPsn(psn);
+        setRegisteredDate(registeredDate);
         resetTouchedOnNotNull();
     }
 }
