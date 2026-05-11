@@ -32,7 +32,4 @@ build/
 .vscode/
 *.sql
 .dockerignore
-Caddyfile
-docker-compose.yml
-Dockerfile
 settings.local.json
