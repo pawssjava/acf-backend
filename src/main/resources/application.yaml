@@ -42,6 +42,7 @@ management:
 logging:
   level:
     root: ${log_level:WARN}
+    org.flywaydb: INFO
 
 application:
   url: ${APP_BASE_URL:asd}
