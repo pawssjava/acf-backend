@@ -392,14 +392,14 @@ public class TournamentMatchService {
                         .execute();
 
                 if (round == 1) {
-                    var rec = dsl.selectFrom(TOURNAMENT_MATCH).where(TOURNAMENT_MATCH.ID.eq(matchId)).fetchOne();
-                    if (rec != null && STATUS_BYE.equals(rec.getStatus())) {
-                        Long advancer = rec.getParticipant1Id() != null ? rec.getParticipant1Id() : rec.getParticipant2Id();
+                    Long p1 = seeded.get((m - 1) * 2);
+                    Long p2 = seeded.get((m - 1) * 2 + 1);
+                    if (p1 != null && p2 == null) {
                         if (nextSlot == 2) {
-                            dsl.update(TOURNAMENT_MATCH).set(TOURNAMENT_MATCH.PARTICIPANT2_ID, advancer)
+                            dsl.update(TOURNAMENT_MATCH).set(TOURNAMENT_MATCH.PARTICIPANT2_ID, p1)
                                     .set(TOURNAMENT_MATCH.UPDATED_DATE, now).where(TOURNAMENT_MATCH.ID.eq(nextId)).execute();
                         } else {
-                            dsl.update(TOURNAMENT_MATCH).set(TOURNAMENT_MATCH.PARTICIPANT1_ID, advancer)
+                            dsl.update(TOURNAMENT_MATCH).set(TOURNAMENT_MATCH.PARTICIPANT1_ID, p1)
                                     .set(TOURNAMENT_MATCH.UPDATED_DATE, now).where(TOURNAMENT_MATCH.ID.eq(nextId)).execute();
                         }
                     }
@@ -804,9 +804,58 @@ public class TournamentMatchService {
     }
 
     private TournamentMatchDto fetchMatchDto(Long matchId, Long tournamentId) {
-        return fetchMatchDtos(tournamentId).stream()
-                .filter(m -> matchId.equals(m.getId()))
-                .findFirst()
+        User u1 = USER.as("u1");
+        User u2 = USER.as("u2");
+
+        return dsl.select(
+                        TOURNAMENT_MATCH.ID,
+                        TOURNAMENT_MATCH.TOURNAMENT_ID,
+                        TOURNAMENT_MATCH.PHASE,
+                        TOURNAMENT_MATCH.ROUND_NUMBER,
+                        TOURNAMENT_MATCH.MATCH_NUMBER,
+                        TOURNAMENT_MATCH.GROUP_NAME,
+                        TOURNAMENT_MATCH.PARTICIPANT1_ID,
+                        TOURNAMENT_MATCH.PARTICIPANT2_ID,
+                        TOURNAMENT_MATCH.SCORE1,
+                        TOURNAMENT_MATCH.SCORE2,
+                        TOURNAMENT_MATCH.WINNER_ID,
+                        TOURNAMENT_MATCH.STATUS,
+                        TOURNAMENT_MATCH.NEXT_MATCH_ID,
+                        u1.USERNAME.as("u1_username"),
+                        u1.FIRST_NAME.as("u1_first_name"),
+                        u1.LAST_NAME.as("u1_last_name"),
+                        u2.USERNAME.as("u2_username"),
+                        u2.FIRST_NAME.as("u2_first_name"),
+                        u2.LAST_NAME.as("u2_last_name")
+                )
+                .from(TOURNAMENT_MATCH)
+                .leftJoin(u1).on(TOURNAMENT_MATCH.PARTICIPANT1_ID.eq(u1.ID))
+                .leftJoin(u2).on(TOURNAMENT_MATCH.PARTICIPANT2_ID.eq(u2.ID))
+                .where(TOURNAMENT_MATCH.ID.eq(matchId)
+                        .and(TOURNAMENT_MATCH.TOURNAMENT_ID.eq(tournamentId)))
+                .fetchOptional(r -> {
+                    TournamentMatchDto dto = new TournamentMatchDto();
+                    dto.setId(r.get(TOURNAMENT_MATCH.ID));
+                    dto.setTournamentId(r.get(TOURNAMENT_MATCH.TOURNAMENT_ID));
+                    dto.setPhase(r.get(TOURNAMENT_MATCH.PHASE));
+                    dto.setRoundNumber(r.get(TOURNAMENT_MATCH.ROUND_NUMBER));
+                    dto.setMatchNumber(r.get(TOURNAMENT_MATCH.MATCH_NUMBER));
+                    dto.setGroupName(r.get(TOURNAMENT_MATCH.GROUP_NAME));
+                    dto.setParticipant1Id(r.get(TOURNAMENT_MATCH.PARTICIPANT1_ID));
+                    dto.setParticipant1Username(r.get("u1_username", String.class));
+                    dto.setParticipant1FirstName(r.get("u1_first_name", String.class));
+                    dto.setParticipant1LastName(r.get("u1_last_name", String.class));
+                    dto.setParticipant2Id(r.get(TOURNAMENT_MATCH.PARTICIPANT2_ID));
+                    dto.setParticipant2Username(r.get("u2_username", String.class));
+                    dto.setParticipant2FirstName(r.get("u2_first_name", String.class));
+                    dto.setParticipant2LastName(r.get("u2_last_name", String.class));
+                    dto.setScore1(r.get(TOURNAMENT_MATCH.SCORE1));
+                    dto.setScore2(r.get(TOURNAMENT_MATCH.SCORE2));
+                    dto.setWinnerId(r.get(TOURNAMENT_MATCH.WINNER_ID));
+                    dto.setStatus(r.get(TOURNAMENT_MATCH.STATUS));
+                    dto.setNextMatchId(r.get(TOURNAMENT_MATCH.NEXT_MATCH_ID));
+                    return dto;
+                })
                 .orElseThrow(() -> notFound("Match not found"));
     }
 

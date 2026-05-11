@@ -44,16 +44,15 @@ public class TournamentTypeService {
     }
 
     public DictionaryDto update(Long id, DictionaryRequest req) {
-        int updated = dsl.update(D_TOURNAMENT_TYPE)
+        var record = dsl.update(D_TOURNAMENT_TYPE)
                 .set(D_TOURNAMENT_TYPE.NAME, req.getName())
                 .set(D_TOURNAMENT_TYPE.IS_ACTIVE, req.getIsActive())
                 .set(D_TOURNAMENT_TYPE.UPDATED_DATE, OffsetDateTime.now())
                 .where(D_TOURNAMENT_TYPE.ID.eq(id))
-                .execute();
-        if (updated == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament type not found");
-        }
-        return findById(id);
+                .returning()
+                .fetchOne();
+        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament type not found");
+        return new DictionaryDto(record.getId(), record.getName(), record.getIsActive(), record.getCreatedDate(), record.getUpdatedDate());
     }
 
     public void delete(Long id) {

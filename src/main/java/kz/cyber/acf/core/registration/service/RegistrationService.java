@@ -2,6 +2,7 @@ package kz.cyber.acf.core.registration.service;
 
 import kz.cyber.acf.core.registration.dto.ParticipantDto;
 import lombok.RequiredArgsConstructor;
+import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDSLContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,37 +24,42 @@ public class RegistrationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PSN is mandatory");
         }
 
-        var tournament = dsl.selectFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(tournamentId)).fetchOne();
-        if (tournament == null) {
+        var tournamentRow = dsl.select(TOURNAMENT.CAPACITY, D_TOURNAMENT_STATUS.NAME.as("status_name"))
+                .from(TOURNAMENT)
+                .join(D_TOURNAMENT_STATUS).on(D_TOURNAMENT_STATUS.ID.eq(TOURNAMENT.TOURNAMENT_STATUS))
+                .where(TOURNAMENT.ID.eq(tournamentId))
+                .fetchOne();
+        if (tournamentRow == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
         }
-
-        String statusName = dsl.select(D_TOURNAMENT_STATUS.NAME)
-                .from(D_TOURNAMENT_STATUS)
-                .where(D_TOURNAMENT_STATUS.ID.eq(tournament.getTournamentStatus()))
-                .fetchOneInto(String.class);
-        if (!"Будущие".equals(statusName)) {
+        if (!"Будущие".equals(tournamentRow.get("status_name", String.class))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Registration is only allowed for upcoming tournaments");
         }
 
-        Boolean isVerified = dsl.select(USER.IS_VERIFIED)
+        var userRow = dsl.select(
+                        USER.IS_VERIFIED,
+                        DSL.field(DSL.exists(
+                                DSL.select(DSL.one())
+                                        .from(TOURNAMENT_REGISTRATION)
+                                        .where(TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId)
+                                                .and(TOURNAMENT_REGISTRATION.USER_ID.eq(userId)))
+                        )).as("already_registered"))
                 .from(USER)
                 .where(USER.ID.eq(userId))
-                .fetchOneInto(Boolean.class);
-        if (!Boolean.TRUE.equals(isVerified)) {
+                .fetchOne();
+        if (userRow == null || !Boolean.TRUE.equals(userRow.get(USER.IS_VERIFIED))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Document verification required to register for tournaments");
         }
-
-        boolean alreadyRegistered = dsl.fetchExists(TOURNAMENT_REGISTRATION,
-                TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId)
-                        .and(TOURNAMENT_REGISTRATION.USER_ID.eq(userId)));
-        if (alreadyRegistered) {
+        if (Boolean.TRUE.equals(userRow.get("already_registered", Boolean.class))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already registered for this tournament");
         }
 
-        int currentCount = dsl.fetchCount(TOURNAMENT_REGISTRATION, TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId));
-        if (tournament.getCapacity() != null && currentCount >= tournament.getCapacity()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tournament is full");
+        Integer capacity = tournamentRow.get(TOURNAMENT.CAPACITY);
+        if (capacity != null) {
+            int currentCount = dsl.fetchCount(TOURNAMENT_REGISTRATION, TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId));
+            if (currentCount >= capacity) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tournament is full");
+            }
         }
 
         dsl.insertInto(TOURNAMENT_REGISTRATION)
@@ -64,9 +70,30 @@ public class RegistrationService {
 
         registrationLogService.log(tournamentId, userId, RegistrationLogService.ACTION_REGISTER, psn.trim());
 
-        return getParticipants(tournamentId).stream()
-                .filter(p -> p.getUserId().equals(userId))
-                .findFirst()
+        return dsl.select(
+                        TOURNAMENT_REGISTRATION.ID,
+                        TOURNAMENT_REGISTRATION.TOURNAMENT_ID,
+                        TOURNAMENT_REGISTRATION.USER_ID,
+                        USER.USERNAME,
+                        USER.FIRST_NAME,
+                        USER.LAST_NAME,
+                        TOURNAMENT_REGISTRATION.REGISTERED_DATE,
+                        TOURNAMENT_REGISTRATION.PSN
+                )
+                .from(TOURNAMENT_REGISTRATION)
+                .join(USER).on(TOURNAMENT_REGISTRATION.USER_ID.eq(USER.ID))
+                .where(TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId)
+                        .and(TOURNAMENT_REGISTRATION.USER_ID.eq(userId)))
+                .fetchOptional(r -> new ParticipantDto(
+                        r.get(TOURNAMENT_REGISTRATION.ID),
+                        r.get(TOURNAMENT_REGISTRATION.TOURNAMENT_ID),
+                        r.get(TOURNAMENT_REGISTRATION.USER_ID),
+                        r.get(USER.USERNAME),
+                        r.get(USER.FIRST_NAME),
+                        r.get(USER.LAST_NAME),
+                        r.get(TOURNAMENT_REGISTRATION.REGISTERED_DATE),
+                        r.get(TOURNAMENT_REGISTRATION.PSN)
+                ))
                 .orElseThrow();
     }
 

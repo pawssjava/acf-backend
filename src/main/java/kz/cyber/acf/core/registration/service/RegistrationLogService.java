@@ -37,11 +37,19 @@ public class RegistrationLogService {
 
         Condition filter = buildFilter(tournamentId, search);
 
-        long total = dsl.selectCount()
-                .from(TOURNAMENT_REGISTRATION_LOG)
-                .join(USER).on(TOURNAMENT_REGISTRATION_LOG.USER_ID.eq(USER.ID))
-                .where(filter)
-                .fetchOne(0, Long.class);
+        long total;
+        if (search == null || search.isBlank()) {
+            total = dsl.selectCount()
+                    .from(TOURNAMENT_REGISTRATION_LOG)
+                    .where(TOURNAMENT_REGISTRATION_LOG.TOURNAMENT_ID.eq(tournamentId))
+                    .fetchOne(0, Long.class);
+        } else {
+            total = dsl.selectCount()
+                    .from(TOURNAMENT_REGISTRATION_LOG)
+                    .join(USER).on(TOURNAMENT_REGISTRATION_LOG.USER_ID.eq(USER.ID))
+                    .where(filter)
+                    .fetchOne(0, Long.class);
+        }
 
         List<RegistrationLogDto> content = dsl.select(
                         TOURNAMENT_REGISTRATION_LOG.ID,

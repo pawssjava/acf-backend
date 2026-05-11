@@ -50,18 +50,18 @@ public class CityService {
     }
 
     public CityDto update(Long id, CityRequest req) {
-        int updated = dsl.update(D_CITY)
+        var record = dsl.update(D_CITY)
                 .set(D_CITY.NAME_RU, req.getNameRu())
                 .set(D_CITY.NAME_KK, req.getNameKk())
                 .set(D_CITY.NAME_EN, req.getNameEn())
                 .set(D_CITY.IS_ACTIVE, req.getIsActive())
                 .set(D_CITY.UPDATED_DATE, OffsetDateTime.now())
                 .where(D_CITY.ID.eq(id))
-                .execute();
-        if (updated == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "City not found");
-        }
-        return findById(id);
+                .returning()
+                .fetchOne();
+        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "City not found");
+        return new CityDto(record.getId(), record.getNameRu(), record.getNameKk(), record.getNameEn(),
+                record.getIsActive(), record.getCreatedDate(), record.getUpdatedDate());
     }
 
     public void delete(Long id) {

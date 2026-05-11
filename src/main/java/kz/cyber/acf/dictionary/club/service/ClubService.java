@@ -50,18 +50,18 @@ public class ClubService {
     }
 
     public ClubDto update(Long id, ClubRequest req) {
-        int updated = dsl.update(D_CLUB)
+        var record = dsl.update(D_CLUB)
                 .set(D_CLUB.NAME_RU, req.getNameRu())
                 .set(D_CLUB.NAME_KK, req.getNameKk())
                 .set(D_CLUB.NAME_EN, req.getNameEn())
                 .set(D_CLUB.IS_ACTIVE, req.getIsActive())
                 .set(D_CLUB.UPDATED_DATE, OffsetDateTime.now())
                 .where(D_CLUB.ID.eq(id))
-                .execute();
-        if (updated == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Club not found");
-        }
-        return findById(id);
+                .returning()
+                .fetchOne();
+        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Club not found");
+        return new ClubDto(record.getId(), record.getNameRu(), record.getNameKk(), record.getNameEn(),
+                record.getIsActive(), record.getCreatedDate(), record.getUpdatedDate());
     }
 
     public void delete(Long id) {

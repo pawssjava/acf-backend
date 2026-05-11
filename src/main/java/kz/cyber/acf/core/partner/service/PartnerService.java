@@ -55,29 +55,29 @@ public class PartnerService {
 
     public PartnerDto update(String username, Long id, PartnerRequest req) {
         userService.requireAdmin(username);
-        int updated = dsl.update(PARTNER)
+        var record = dsl.update(PARTNER)
                 .set(PARTNER.NAME, req.getName())
                 .set(PARTNER.DESCRIPTION, req.getDescription())
                 .set(PARTNER.HYPERLINK, req.getHyperlink())
                 .set(PARTNER.UPDATED_DATE, OffsetDateTime.now())
                 .where(PARTNER.ID.eq(id))
-                .execute();
-        if (updated == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partner not found");
-        }
-        return findById(id);
+                .returning()
+                .fetchOne();
+        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partner not found");
+        return toDto(record.getId(), record.getName(), record.getLogo(), record.getDescription(), record.getHyperlink(), record.getCreatedDate(), record.getUpdatedDate());
     }
 
     public PartnerDto uploadLogo(String username, Long id, MultipartFile file) {
         userService.requireAdmin(username);
-        findById(id);
         String objectName = minioService.upload(BUCKET, file);
-        dsl.update(PARTNER)
+        var record = dsl.update(PARTNER)
                 .set(PARTNER.LOGO, objectName)
                 .set(PARTNER.UPDATED_DATE, OffsetDateTime.now())
                 .where(PARTNER.ID.eq(id))
-                .execute();
-        return findById(id);
+                .returning()
+                .fetchOne();
+        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partner not found");
+        return toDto(record.getId(), record.getName(), record.getLogo(), record.getDescription(), record.getHyperlink(), record.getCreatedDate(), record.getUpdatedDate());
     }
 
     public void delete(String username, Long id) {

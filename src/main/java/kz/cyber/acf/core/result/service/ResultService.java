@@ -56,10 +56,7 @@ public class ResultService {
                 .set(TOURNAMENT_RESULT.SCORE, req.getScore())
                 .set(TOURNAMENT_RESULT.CREATED_DATE, OffsetDateTime.now())
                 .execute();
-        return getResults(tournamentId).stream()
-                .filter(r -> r.getUserId().equals(req.getUserId()))
-                .findFirst()
-                .orElseThrow();
+        return findResult(tournamentId, req.getUserId());
     }
 
     public ResultDto update(Long tournamentId, Long userId, ResultRequest req) {
@@ -72,9 +69,36 @@ public class ResultService {
         if (updated == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Result not found");
         }
-        return getResults(tournamentId).stream()
-                .filter(r -> r.getUserId().equals(userId))
-                .findFirst()
+        return findResult(tournamentId, userId);
+    }
+
+    private ResultDto findResult(Long tournamentId, Long userId) {
+        return dsl.select(
+                        TOURNAMENT_RESULT.ID,
+                        TOURNAMENT_RESULT.TOURNAMENT_ID,
+                        TOURNAMENT_RESULT.USER_ID,
+                        USER.USERNAME,
+                        USER.FIRST_NAME,
+                        USER.LAST_NAME,
+                        TOURNAMENT_RESULT.PLACE,
+                        TOURNAMENT_RESULT.SCORE,
+                        TOURNAMENT_RESULT.CREATED_DATE
+                )
+                .from(TOURNAMENT_RESULT)
+                .join(USER).on(TOURNAMENT_RESULT.USER_ID.eq(USER.ID))
+                .where(TOURNAMENT_RESULT.TOURNAMENT_ID.eq(tournamentId)
+                        .and(TOURNAMENT_RESULT.USER_ID.eq(userId)))
+                .fetchOptional(r -> new ResultDto(
+                        r.get(TOURNAMENT_RESULT.ID),
+                        r.get(TOURNAMENT_RESULT.TOURNAMENT_ID),
+                        r.get(TOURNAMENT_RESULT.USER_ID),
+                        r.get(USER.USERNAME),
+                        r.get(USER.FIRST_NAME),
+                        r.get(USER.LAST_NAME),
+                        r.get(TOURNAMENT_RESULT.PLACE),
+                        r.get(TOURNAMENT_RESULT.SCORE),
+                        r.get(TOURNAMENT_RESULT.CREATED_DATE)
+                ))
                 .orElseThrow();
     }
 

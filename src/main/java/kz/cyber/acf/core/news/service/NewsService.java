@@ -27,6 +27,7 @@ public class NewsService {
     public List<NewsDto> findAll() {
         return dsl.selectFrom(NEWS)
                 .orderBy(NEWS.CREATED_DATE.desc())
+                .limit(25)
                 .fetch(r -> new NewsDto(r.getId(), r.getTitle(), r.getDescription(), resolveUrl(r.getImage()), r.getCreatedDate(), r.getUpdatedDate()));
     }
 
@@ -50,27 +51,27 @@ public class NewsService {
     }
 
     public NewsDto update(Long id, NewsRequest req) {
-        int updated = dsl.update(NEWS)
+        var record = dsl.update(NEWS)
                 .set(NEWS.TITLE, req.getTitle())
                 .set(NEWS.DESCRIPTION, req.getDescription())
                 .set(NEWS.UPDATED_DATE, OffsetDateTime.now())
                 .where(NEWS.ID.eq(id))
-                .execute();
-        if (updated == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found");
-        }
-        return findById(id);
+                .returning()
+                .fetchOne();
+        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found");
+        return new NewsDto(record.getId(), record.getTitle(), record.getDescription(), resolveUrl(record.getImage()), record.getCreatedDate(), record.getUpdatedDate());
     }
 
     public NewsDto uploadImage(Long id, MultipartFile file) {
-        findById(id);
         String objectName = minioService.upload(BUCKET, file);
-        dsl.update(NEWS)
+        var record = dsl.update(NEWS)
                 .set(NEWS.IMAGE, objectName)
                 .set(NEWS.UPDATED_DATE, OffsetDateTime.now())
                 .where(NEWS.ID.eq(id))
-                .execute();
-        return findById(id);
+                .returning()
+                .fetchOne();
+        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found");
+        return new NewsDto(record.getId(), record.getTitle(), record.getDescription(), resolveUrl(record.getImage()), record.getCreatedDate(), record.getUpdatedDate());
     }
 
     public void delete(Long id) {

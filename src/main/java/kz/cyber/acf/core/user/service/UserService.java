@@ -1,10 +1,6 @@
 package kz.cyber.acf.core.user.service;
 
-import kz.cyber.acf.core.user.dto.PageResponse;
-import kz.cyber.acf.core.user.dto.PlayerMatchDto;
-import kz.cyber.acf.core.user.dto.PlayerTournamentHistoryDto;
-import kz.cyber.acf.core.user.dto.UpdateUserRequest;
-import kz.cyber.acf.core.user.dto.UserDto;
+import kz.cyber.acf.core.user.dto.*;
 import kz.cyber.acf.storage.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
@@ -41,7 +37,7 @@ public class UserService {
                 .from(USER)
                 .leftJoin(D_CITY).on(USER.CITY_ID.eq(D_CITY.ID))
                 .leftJoin(D_CLUB).on(USER.CLUB_ID.eq(D_CLUB.ID))
-                .fetch(r -> mapUser(r));
+                .fetch(this::mapUser);
     }
 
     public UserDto findByUsername(String username) {
@@ -57,7 +53,7 @@ public class UserService {
                 .leftJoin(D_CLUB).on(USER.CLUB_ID.eq(D_CLUB.ID))
                 .where(USER.USERNAME.eq(username))
                 .fetchOptional()
-                .map(r -> mapUser(r))
+                .map(this::mapUser)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
@@ -74,7 +70,7 @@ public class UserService {
                 .leftJoin(D_CLUB).on(USER.CLUB_ID.eq(D_CLUB.ID))
                 .where(USER.ID.eq(id))
                 .fetchOptional()
-                .map(r -> mapUser(r))
+                .map(this::mapUser)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
@@ -95,7 +91,6 @@ public class UserService {
     }
 
     public UserDto uploadPhoto(Long id, MultipartFile file) {
-        findById(id);
         String objectName = minioService.upload(BUCKET_USERS, file);
         dsl.update(USER)
                 .set(USER.PHOTO, objectName)
@@ -106,7 +101,6 @@ public class UserService {
     }
 
     public UserDto uploadVerificationDocument(Long id, MultipartFile file) {
-        findById(id);
         kzIdDocumentValidator.validate(file);
         String objectName = minioService.upload(BUCKET_VERIFICATIONS, file);
         dsl.update(USER)
@@ -136,8 +130,6 @@ public class UserService {
     }
 
     public PageResponse<PlayerTournamentHistoryDto> getTournamentHistory(Long userId, int page, int size) {
-        findById(userId);
-
         int offset = page * size;
 
         long total = dsl.selectCount()
@@ -190,8 +182,6 @@ public class UserService {
     }
 
     public PageResponse<PlayerMatchDto> getMatchHistory(Long userId, int page, int size) {
-        findById(userId);
-
         int offset = page * size;
 
         var condition = TOURNAMENT_MATCH.PARTICIPANT1_ID.eq(userId)
