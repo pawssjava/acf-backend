@@ -52,10 +52,10 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<DCityRecord> D_CITY_PKEY = Internal.createUniqueKey(DCity.D_CITY, DSL.name("d_city_pkey"), new TableField[] { DCity.D_CITY.ID }, true);
-    public static final UniqueKey<EducationMaterialRecord> EDUCATION_MATERIAL_PKEY = Internal.createUniqueKey(EducationMaterial.EDUCATION_MATERIAL, DSL.name("education_material_pkey"), new TableField[] { EducationMaterial.EDUCATION_MATERIAL.ID }, true);
     public static final UniqueKey<DClubRecord> D_CLUB_PKEY = Internal.createUniqueKey(DClub.D_CLUB, DSL.name("d_club_pkey"), new TableField[] { DClub.D_CLUB.ID }, true);
     public static final UniqueKey<DTournamentStatusRecord> D_TOURNAMENT_STATUS_PKEY = Internal.createUniqueKey(DTournamentStatus.D_TOURNAMENT_STATUS, DSL.name("d_tournament_status_pkey"), new TableField[] { DTournamentStatus.D_TOURNAMENT_STATUS.ID }, true);
     public static final UniqueKey<DTournamentTypeRecord> D_TOURNAMENT_TYPE_PKEY = Internal.createUniqueKey(DTournamentType.D_TOURNAMENT_TYPE, DSL.name("d_tournament_type_pkey"), new TableField[] { DTournamentType.D_TOURNAMENT_TYPE.ID }, true);
+    public static final UniqueKey<EducationMaterialRecord> EDUCATION_MATERIAL_PKEY = Internal.createUniqueKey(EducationMaterial.EDUCATION_MATERIAL, DSL.name("education_material_pkey"), new TableField[] { EducationMaterial.EDUCATION_MATERIAL.ID }, true);
     public static final UniqueKey<FlywaySchemaHistoryRecord> FLYWAY_SCHEMA_HISTORY_PK = Internal.createUniqueKey(FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, DSL.name("flyway_schema_history_pk"), new TableField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.INSTALLED_RANK }, true);
     public static final UniqueKey<NewsRecord> NEWS_PKEY = Internal.createUniqueKey(News.NEWS, DSL.name("news_pkey"), new TableField[] { News.NEWS.ID }, true);
     public static final UniqueKey<PartnerRecord> PARTNER_PKEY = Internal.createUniqueKey(Partner.PARTNER, DSL.name("partner_pkey"), new TableField[] { Partner.PARTNER.ID }, true);

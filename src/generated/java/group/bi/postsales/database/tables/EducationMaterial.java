@@ -5,15 +5,19 @@ package group.bi.postsales.database.tables;
 
 
 import group.bi.postsales.database.Acf;
+import group.bi.postsales.database.Indexes;
 import group.bi.postsales.database.Keys;
 import group.bi.postsales.database.tables.records.EducationMaterialRecord;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Identity;
+import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
@@ -38,23 +42,68 @@ public class EducationMaterial extends TableImpl<EducationMaterialRecord> {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The reference instance of <code>acf.education_material</code>
+     */
     public static final EducationMaterial EDUCATION_MATERIAL = new EducationMaterial();
 
+    /**
+     * The class holding records for this type
+     */
     @Override
     public Class<EducationMaterialRecord> getRecordType() {
         return EducationMaterialRecord.class;
     }
 
+    /**
+     * The column <code>acf.education_material.id</code>.
+     */
     public final TableField<EducationMaterialRecord, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
+
+    /**
+     * The column <code>acf.education_material.title</code>.
+     */
     public final TableField<EducationMaterialRecord, String> TITLE = createField(DSL.name("title"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>acf.education_material.description</code>.
+     */
     public final TableField<EducationMaterialRecord, String> DESCRIPTION = createField(DSL.name("description"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>acf.education_material.category</code>.
+     */
     public final TableField<EducationMaterialRecord, String> CATEGORY = createField(DSL.name("category"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>acf.education_material.video_path</code>.
+     */
     public final TableField<EducationMaterialRecord, String> VIDEO_PATH = createField(DSL.name("video_path"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>acf.education_material.presentation_path</code>.
+     */
     public final TableField<EducationMaterialRecord, String> PRESENTATION_PATH = createField(DSL.name("presentation_path"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>acf.education_material.thumbnail_path</code>.
+     */
     public final TableField<EducationMaterialRecord, String> THUMBNAIL_PATH = createField(DSL.name("thumbnail_path"), SQLDataType.VARCHAR, this, "");
-    public final TableField<EducationMaterialRecord, Integer> ORDERING = createField(DSL.name("ordering"), SQLDataType.INTEGER, this, "");
-    public final TableField<EducationMaterialRecord, OffsetDateTime> CREATED_DATE = createField(DSL.name("created_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
-    public final TableField<EducationMaterialRecord, OffsetDateTime> UPDATED_DATE = createField(DSL.name("updated_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+
+    /**
+     * The column <code>acf.education_material.ordering</code>.
+     */
+    public final TableField<EducationMaterialRecord, Integer> ORDERING = createField(DSL.name("ordering"), SQLDataType.INTEGER.defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>acf.education_material.created_date</code>.
+     */
+    public final TableField<EducationMaterialRecord, OffsetDateTime> CREATED_DATE = createField(DSL.name("created_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+
+    /**
+     * The column <code>acf.education_material.updated_date</code>.
+     */
+    public final TableField<EducationMaterialRecord, OffsetDateTime> UPDATED_DATE = createField(DSL.name("updated_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     private EducationMaterial(Name alias, Table<EducationMaterialRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -64,14 +113,23 @@ public class EducationMaterial extends TableImpl<EducationMaterialRecord> {
         super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
+    /**
+     * Create an aliased <code>acf.education_material</code> table reference
+     */
     public EducationMaterial(String alias) {
         this(DSL.name(alias), EDUCATION_MATERIAL);
     }
 
+    /**
+     * Create an aliased <code>acf.education_material</code> table reference
+     */
     public EducationMaterial(Name alias) {
         this(alias, EDUCATION_MATERIAL);
     }
 
+    /**
+     * Create a <code>acf.education_material</code> table reference
+     */
     public EducationMaterial() {
         this(DSL.name("education_material"), null);
     }
@@ -79,6 +137,11 @@ public class EducationMaterial extends TableImpl<EducationMaterialRecord> {
     @Override
     public Schema getSchema() {
         return aliased() ? null : Acf.ACF;
+    }
+
+    @Override
+    public List<Index> getIndexes() {
+        return Arrays.asList(Indexes.IDX_EDUCATION_MATERIAL_CATEGORY);
     }
 
     @Override
@@ -106,70 +169,109 @@ public class EducationMaterial extends TableImpl<EducationMaterialRecord> {
         return new EducationMaterial(alias.getQualifiedName(), this);
     }
 
+    /**
+     * Rename this table
+     */
     @Override
     public EducationMaterial rename(String name) {
         return new EducationMaterial(DSL.name(name), null);
     }
 
+    /**
+     * Rename this table
+     */
     @Override
     public EducationMaterial rename(Name name) {
         return new EducationMaterial(name, null);
     }
 
+    /**
+     * Rename this table
+     */
     @Override
     public EducationMaterial rename(Table<?> name) {
         return new EducationMaterial(name.getQualifiedName(), null);
     }
 
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
     public EducationMaterial where(Condition condition) {
         return new EducationMaterial(getQualifiedName(), aliased() ? this : null, null, condition);
     }
 
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
     public EducationMaterial where(Collection<? extends Condition> conditions) {
         return where(DSL.and(conditions));
     }
 
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
     public EducationMaterial where(Condition... conditions) {
         return where(DSL.and(conditions));
     }
 
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
     public EducationMaterial where(Field<Boolean> condition) {
         return where(DSL.condition(condition));
     }
 
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
     @PlainSQL
     public EducationMaterial where(SQL condition) {
         return where(DSL.condition(condition));
     }
 
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
     @PlainSQL
     public EducationMaterial where(@Stringly.SQL String condition) {
         return where(DSL.condition(condition));
     }
 
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
     @PlainSQL
     public EducationMaterial where(@Stringly.SQL String condition, Object... binds) {
         return where(DSL.condition(condition, binds));
     }
 
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
     @PlainSQL
     public EducationMaterial where(@Stringly.SQL String condition, QueryPart... parts) {
         return where(DSL.condition(condition, parts));
     }
 
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
     public EducationMaterial whereExists(Select<?> select) {
         return where(DSL.exists(select));
     }
 
+    /**
+     * Create an inline derived table from this table
+     */
     @Override
     public EducationMaterial whereNotExists(Select<?> select) {
         return where(DSL.notExists(select));

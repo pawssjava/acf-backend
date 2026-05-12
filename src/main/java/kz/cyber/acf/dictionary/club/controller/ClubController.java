@@ -38,27 +38,33 @@ public class ClubController {
         return clubService.findById(id);
     }
 
-    @Operation(summary = "Create club",
-            responses = {@ApiResponse(responseCode = "201", description = "Club created")})
+    @Operation(summary = "Create club (admin only)",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Club created"),
+                    @ApiResponse(responseCode = "403", description = "Admin access required")
+            })
     @PostMapping
     public ResponseEntity<ClubDto> create(@RequestBody ClubRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(clubService.create(req));
     }
 
-    @Operation(summary = "Update club",
+    @Operation(summary = "Update club (admin only)",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Club updated"),
+                    @ApiResponse(responseCode = "403", description = "Admin access required"),
                     @ApiResponse(responseCode = "404", description = "Club not found")
             })
     @PutMapping("/{id}")
-    public ClubDto update(@Parameter(description = "Club ID") @PathVariable Long id,
-                          @RequestBody ClubRequest req) {
+    public ClubDto update(
+            @Parameter(description = "Club ID") @PathVariable Long id,
+            @RequestBody ClubRequest req) {
         return clubService.update(id, req);
     }
 
-    @Operation(summary = "Delete club",
+    @Operation(summary = "Delete club (admin only)",
             responses = {
                     @ApiResponse(responseCode = "204", description = "Club deleted"),
+                    @ApiResponse(responseCode = "403", description = "Admin access required"),
                     @ApiResponse(responseCode = "404", description = "Club not found")
             })
     @DeleteMapping("/{id}")

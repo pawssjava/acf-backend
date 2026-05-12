@@ -19,8 +19,8 @@
         <org.jooq.version>3.20.3</org.jooq.version>
         <spring-cloud.version>2024.0.1</spring-cloud.version>
         <db.driver>org.postgresql.Driver</db.driver>
-        <db.url>jdbc:postgresql://localhost:5432/postgres?currentSchema=acf></db.url>
-        <db.username>postgres</db.username>
+        <db.url>jdbc:postgresql://localhost:5432/acf?currentSchema=acf></db.url>
+        <db.username>myapp</db.username>
         <db.password>postgres</db.password>
     </properties>
 

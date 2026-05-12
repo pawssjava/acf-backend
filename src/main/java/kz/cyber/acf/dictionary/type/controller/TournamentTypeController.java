@@ -41,9 +41,10 @@ public class TournamentTypeController {
     }
 
     @Operation(
-            summary = "Create tournament type",
+            summary = "Create tournament type (admin only)",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Type created")
+                    @ApiResponse(responseCode = "201", description = "Type created"),
+                    @ApiResponse(responseCode = "403", description = "Admin access required")
             }
     )
     @PostMapping
@@ -52,9 +53,10 @@ public class TournamentTypeController {
     }
 
     @Operation(
-            summary = "Update tournament type",
+            summary = "Update tournament type (admin only)",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Type updated"),
+                    @ApiResponse(responseCode = "403", description = "Admin access required"),
                     @ApiResponse(responseCode = "404", description = "Type not found")
             }
     )
@@ -66,9 +68,10 @@ public class TournamentTypeController {
     }
 
     @Operation(
-            summary = "Delete tournament type",
+            summary = "Delete tournament type (admin only)",
             responses = {
                     @ApiResponse(responseCode = "204", description = "Type deleted"),
+                    @ApiResponse(responseCode = "403", description = "Admin access required"),
                     @ApiResponse(responseCode = "404", description = "Type not found")
             }
     )

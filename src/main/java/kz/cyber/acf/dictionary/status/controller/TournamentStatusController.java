@@ -41,9 +41,10 @@ public class TournamentStatusController {
     }
 
     @Operation(
-            summary = "Create tournament status",
+            summary = "Create tournament status (admin only)",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Status created")
+                    @ApiResponse(responseCode = "201", description = "Status created"),
+                    @ApiResponse(responseCode = "403", description = "Admin access required")
             }
     )
     @PostMapping
@@ -52,9 +53,10 @@ public class TournamentStatusController {
     }
 
     @Operation(
-            summary = "Update tournament status",
+            summary = "Update tournament status (admin only)",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Status updated"),
+                    @ApiResponse(responseCode = "403", description = "Admin access required"),
                     @ApiResponse(responseCode = "404", description = "Status not found")
             }
     )
@@ -66,9 +68,10 @@ public class TournamentStatusController {
     }
 
     @Operation(
-            summary = "Delete tournament status",
+            summary = "Delete tournament status (admin only)",
             responses = {
                     @ApiResponse(responseCode = "204", description = "Status deleted"),
+                    @ApiResponse(responseCode = "403", description = "Admin access required"),
                     @ApiResponse(responseCode = "404", description = "Status not found")
             }
     )

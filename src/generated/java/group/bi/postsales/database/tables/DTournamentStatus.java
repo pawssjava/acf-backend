@@ -57,11 +57,6 @@ public class DTournamentStatus extends TableImpl<DTournamentStatusRecord> {
     public final TableField<DTournamentStatusRecord, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>acf.d_tournament_status.name</code>.
-     */
-    public final TableField<DTournamentStatusRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR, this, "");
-
-    /**
      * The column <code>acf.d_tournament_status.is_active</code>.
      */
     public final TableField<DTournamentStatusRecord, Boolean> IS_ACTIVE = createField(DSL.name("is_active"), SQLDataType.BOOLEAN.defaultValue(DSL.field(DSL.raw("true"), SQLDataType.BOOLEAN)), this, "");
@@ -75,6 +70,21 @@ public class DTournamentStatus extends TableImpl<DTournamentStatusRecord> {
      * The column <code>acf.d_tournament_status.created_date</code>.
      */
     public final TableField<DTournamentStatusRecord, OffsetDateTime> CREATED_DATE = createField(DSL.name("created_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+
+    /**
+     * The column <code>acf.d_tournament_status.name_ru</code>.
+     */
+    public final TableField<DTournamentStatusRecord, String> NAME_RU = createField(DSL.name("name_ru"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>acf.d_tournament_status.name_kk</code>.
+     */
+    public final TableField<DTournamentStatusRecord, String> NAME_KK = createField(DSL.name("name_kk"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>acf.d_tournament_status.name_en</code>.
+     */
+    public final TableField<DTournamentStatusRecord, String> NAME_EN = createField(DSL.name("name_en"), SQLDataType.VARCHAR, this, "");
 
     private DTournamentStatus(Name alias, Table<DTournamentStatusRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

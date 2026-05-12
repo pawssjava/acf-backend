@@ -27,7 +27,7 @@ public class RegistrationService {
                     "PSN is mandatory");
         }
 
-        var tournamentRow = dsl.select(TOURNAMENT.CAPACITY, D_TOURNAMENT_STATUS.NAME.as("status_name"))
+        var tournamentRow = dsl.select(TOURNAMENT.CAPACITY, D_TOURNAMENT_STATUS.NAME_RU.as("status_name"))
                 .from(TOURNAMENT)
                 .join(D_TOURNAMENT_STATUS).on(D_TOURNAMENT_STATUS.ID.eq(TOURNAMENT.TOURNAMENT_STATUS))
                 .where(TOURNAMENT.ID.eq(tournamentId))
@@ -116,7 +116,7 @@ public class RegistrationService {
     }
 
     public void unregister(Long tournamentId, Long userId) {
-        String statusName = dsl.select(D_TOURNAMENT_STATUS.NAME)
+        String statusName = dsl.select(D_TOURNAMENT_STATUS.NAME_RU)
                 .from(TOURNAMENT)
                 .join(D_TOURNAMENT_STATUS).on(D_TOURNAMENT_STATUS.ID.eq(TOURNAMENT.TOURNAMENT_STATUS))
                 .where(TOURNAMENT.ID.eq(tournamentId))

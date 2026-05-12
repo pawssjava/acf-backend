@@ -40,9 +40,10 @@ public class CityController {
     }
 
     @Operation(
-            summary = "Create city",
+            summary = "Create city (admin only)",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "City created")
+                    @ApiResponse(responseCode = "201", description = "City created"),
+                    @ApiResponse(responseCode = "403", description = "Admin access required")
             }
     )
     @PostMapping
@@ -51,9 +52,10 @@ public class CityController {
     }
 
     @Operation(
-            summary = "Update city",
+            summary = "Update city (admin only)",
             responses = {
                     @ApiResponse(responseCode = "200", description = "City updated"),
+                    @ApiResponse(responseCode = "403", description = "Admin access required"),
                     @ApiResponse(responseCode = "404", description = "City not found")
             }
     )
@@ -65,9 +67,10 @@ public class CityController {
     }
 
     @Operation(
-            summary = "Delete city",
+            summary = "Delete city (admin only)",
             responses = {
                     @ApiResponse(responseCode = "204", description = "City deleted"),
+                    @ApiResponse(responseCode = "403", description = "Admin access required"),
                     @ApiResponse(responseCode = "404", description = "City not found")
             }
     )

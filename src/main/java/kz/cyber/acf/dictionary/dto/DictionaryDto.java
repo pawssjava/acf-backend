@@ -11,7 +11,9 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 public class DictionaryDto {
     private Long id;
-    private String name;
+    private String nameRu;
+    private String nameKk;
+    private String nameEn;
     private Boolean isActive;
     private OffsetDateTime createdDate;
     private OffsetDateTime updatedDate;

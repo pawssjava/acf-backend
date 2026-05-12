@@ -17,9 +17,13 @@ public class PlayerTournamentHistoryDto {
     private LocalDate startDate;
     private LocalDate endDate;
     private Long tournamentStatusId;
-    private String tournamentStatusName;
+    private String tournamentStatusNameRu;
+    private String tournamentStatusNameKk;
+    private String tournamentStatusNameEn;
     private Long tournamentTypeId;
-    private String tournamentTypeName;
+    private String tournamentTypeNameRu;
+    private String tournamentTypeNameKk;
+    private String tournamentTypeNameEn;
     private String format;
     private Integer place;
     private BigDecimal score;

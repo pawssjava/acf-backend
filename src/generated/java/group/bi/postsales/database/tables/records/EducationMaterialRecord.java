@@ -20,49 +20,172 @@ public class EducationMaterialRecord extends UpdatableRecordImpl<EducationMateri
 
     private static final long serialVersionUID = 1L;
 
-    public void setId(Long value) { set(0, value); }
-    public Long getId() { return (Long) get(0); }
+    /**
+     * Setter for <code>acf.education_material.id</code>.
+     */
+    public void setId(Long value) {
+        set(0, value);
+    }
 
-    public void setTitle(String value) { set(1, value); }
-    public String getTitle() { return (String) get(1); }
+    /**
+     * Getter for <code>acf.education_material.id</code>.
+     */
+    public Long getId() {
+        return (Long) get(0);
+    }
 
-    public void setDescription(String value) { set(2, value); }
-    public String getDescription() { return (String) get(2); }
+    /**
+     * Setter for <code>acf.education_material.title</code>.
+     */
+    public void setTitle(String value) {
+        set(1, value);
+    }
 
-    public void setCategory(String value) { set(3, value); }
-    public String getCategory() { return (String) get(3); }
+    /**
+     * Getter for <code>acf.education_material.title</code>.
+     */
+    public String getTitle() {
+        return (String) get(1);
+    }
 
-    public void setVideoPath(String value) { set(4, value); }
-    public String getVideoPath() { return (String) get(4); }
+    /**
+     * Setter for <code>acf.education_material.description</code>.
+     */
+    public void setDescription(String value) {
+        set(2, value);
+    }
 
-    public void setPresentationPath(String value) { set(5, value); }
-    public String getPresentationPath() { return (String) get(5); }
+    /**
+     * Getter for <code>acf.education_material.description</code>.
+     */
+    public String getDescription() {
+        return (String) get(2);
+    }
 
-    public void setThumbnailPath(String value) { set(6, value); }
-    public String getThumbnailPath() { return (String) get(6); }
+    /**
+     * Setter for <code>acf.education_material.category</code>.
+     */
+    public void setCategory(String value) {
+        set(3, value);
+    }
 
-    public void setOrdering(Integer value) { set(7, value); }
-    public Integer getOrdering() { return (Integer) get(7); }
+    /**
+     * Getter for <code>acf.education_material.category</code>.
+     */
+    public String getCategory() {
+        return (String) get(3);
+    }
 
-    public void setCreatedDate(OffsetDateTime value) { set(8, value); }
-    public OffsetDateTime getCreatedDate() { return (OffsetDateTime) get(8); }
+    /**
+     * Setter for <code>acf.education_material.video_path</code>.
+     */
+    public void setVideoPath(String value) {
+        set(4, value);
+    }
 
-    public void setUpdatedDate(OffsetDateTime value) { set(9, value); }
-    public OffsetDateTime getUpdatedDate() { return (OffsetDateTime) get(9); }
+    /**
+     * Getter for <code>acf.education_material.video_path</code>.
+     */
+    public String getVideoPath() {
+        return (String) get(4);
+    }
+
+    /**
+     * Setter for <code>acf.education_material.presentation_path</code>.
+     */
+    public void setPresentationPath(String value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>acf.education_material.presentation_path</code>.
+     */
+    public String getPresentationPath() {
+        return (String) get(5);
+    }
+
+    /**
+     * Setter for <code>acf.education_material.thumbnail_path</code>.
+     */
+    public void setThumbnailPath(String value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>acf.education_material.thumbnail_path</code>.
+     */
+    public String getThumbnailPath() {
+        return (String) get(6);
+    }
+
+    /**
+     * Setter for <code>acf.education_material.ordering</code>.
+     */
+    public void setOrdering(Integer value) {
+        set(7, value);
+    }
+
+    /**
+     * Getter for <code>acf.education_material.ordering</code>.
+     */
+    public Integer getOrdering() {
+        return (Integer) get(7);
+    }
+
+    /**
+     * Setter for <code>acf.education_material.created_date</code>.
+     */
+    public void setCreatedDate(OffsetDateTime value) {
+        set(8, value);
+    }
+
+    /**
+     * Getter for <code>acf.education_material.created_date</code>.
+     */
+    public OffsetDateTime getCreatedDate() {
+        return (OffsetDateTime) get(8);
+    }
+
+    /**
+     * Setter for <code>acf.education_material.updated_date</code>.
+     */
+    public void setUpdatedDate(OffsetDateTime value) {
+        set(9, value);
+    }
+
+    /**
+     * Getter for <code>acf.education_material.updated_date</code>.
+     */
+    public OffsetDateTime getUpdatedDate() {
+        return (OffsetDateTime) get(9);
+    }
+
+    // -------------------------------------------------------------------------
+    // Primary key information
+    // -------------------------------------------------------------------------
 
     @Override
     public Record1<Long> key() {
         return (Record1) super.key();
     }
 
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
+    /**
+     * Create a detached EducationMaterialRecord
+     */
     public EducationMaterialRecord() {
         super(EducationMaterial.EDUCATION_MATERIAL);
     }
 
-    public EducationMaterialRecord(Long id, String title, String description, String category,
-                                   String videoPath, String presentationPath, String thumbnailPath,
-                                   Integer ordering, OffsetDateTime createdDate, OffsetDateTime updatedDate) {
+    /**
+     * Create a detached, initialised EducationMaterialRecord
+     */
+    public EducationMaterialRecord(Long id, String title, String description, String category, String videoPath, String presentationPath, String thumbnailPath, Integer ordering, OffsetDateTime createdDate, OffsetDateTime updatedDate) {
         super(EducationMaterial.EDUCATION_MATERIAL);
+
         setId(id);
         setTitle(title);
         setDescription(description);

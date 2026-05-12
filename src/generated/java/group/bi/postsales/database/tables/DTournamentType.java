@@ -57,11 +57,6 @@ public class DTournamentType extends TableImpl<DTournamentTypeRecord> {
     public final TableField<DTournamentTypeRecord, Long> ID = createField(DSL.name("id"), SQLDataType.BIGINT.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>acf.d_tournament_type.name</code>.
-     */
-    public final TableField<DTournamentTypeRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR, this, "");
-
-    /**
      * The column <code>acf.d_tournament_type.is_active</code>.
      */
     public final TableField<DTournamentTypeRecord, Boolean> IS_ACTIVE = createField(DSL.name("is_active"), SQLDataType.BOOLEAN.defaultValue(DSL.field(DSL.raw("true"), SQLDataType.BOOLEAN)), this, "");
@@ -75,6 +70,21 @@ public class DTournamentType extends TableImpl<DTournamentTypeRecord> {
      * The column <code>acf.d_tournament_type.created_date</code>.
      */
     public final TableField<DTournamentTypeRecord, OffsetDateTime> CREATED_DATE = createField(DSL.name("created_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+
+    /**
+     * The column <code>acf.d_tournament_type.name_ru</code>.
+     */
+    public final TableField<DTournamentTypeRecord, String> NAME_RU = createField(DSL.name("name_ru"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>acf.d_tournament_type.name_kk</code>.
+     */
+    public final TableField<DTournamentTypeRecord, String> NAME_KK = createField(DSL.name("name_kk"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>acf.d_tournament_type.name_en</code>.
+     */
+    public final TableField<DTournamentTypeRecord, String> NAME_EN = createField(DSL.name("name_en"), SQLDataType.VARCHAR, this, "");
 
     private DTournamentType(Name alias, Table<DTournamentTypeRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);

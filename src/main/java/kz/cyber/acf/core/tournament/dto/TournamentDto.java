@@ -20,9 +20,13 @@ public class TournamentDto {
     private Integer capacity;
     private BigDecimal prizeMoney;
     private Long tournamentStatusId;
-    private String tournamentStatusName;
+    private String tournamentStatusNameRu;
+    private String tournamentStatusNameKk;
+    private String tournamentStatusNameEn;
     private Long tournamentTypeId;
-    private String tournamentTypeName;
+    private String tournamentTypeNameRu;
+    private String tournamentTypeNameKk;
+    private String tournamentTypeNameEn;
     private OffsetDateTime createdDate;
     private OffsetDateTime updatedDate;
     private String format;

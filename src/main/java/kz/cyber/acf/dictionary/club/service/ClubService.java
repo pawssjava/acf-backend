@@ -69,8 +69,12 @@ public class ClubService {
     }
 
     public void delete(Long id) {
-        int deleted = dsl.deleteFrom(D_CLUB).where(D_CLUB.ID.eq(id)).execute();
-        if (deleted == 0) {
+        int updated = dsl.update(D_CLUB)
+                .set(D_CLUB.IS_ACTIVE, false)
+                .set(D_CLUB.UPDATED_DATE, OffsetDateTime.now())
+                .where(D_CLUB.ID.eq(id))
+                .execute();
+        if (updated == 0) {
             throw new AppException(HttpStatus.NOT_FOUND,
                 "Клуб табылмады",
                 "Клуб не найден",

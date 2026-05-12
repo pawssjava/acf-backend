@@ -35,59 +35,87 @@ public class DTournamentTypeRecord extends UpdatableRecordImpl<DTournamentTypeRe
     }
 
     /**
-     * Setter for <code>acf.d_tournament_type.name</code>.
-     */
-    public void setName(String value) {
-        set(1, value);
-    }
-
-    /**
-     * Getter for <code>acf.d_tournament_type.name</code>.
-     */
-    public String getName() {
-        return (String) get(1);
-    }
-
-    /**
      * Setter for <code>acf.d_tournament_type.is_active</code>.
      */
     public void setIsActive(Boolean value) {
-        set(2, value);
+        set(1, value);
     }
 
     /**
      * Getter for <code>acf.d_tournament_type.is_active</code>.
      */
     public Boolean getIsActive() {
-        return (Boolean) get(2);
+        return (Boolean) get(1);
     }
 
     /**
      * Setter for <code>acf.d_tournament_type.updated_date</code>.
      */
     public void setUpdatedDate(OffsetDateTime value) {
-        set(3, value);
+        set(2, value);
     }
 
     /**
      * Getter for <code>acf.d_tournament_type.updated_date</code>.
      */
     public OffsetDateTime getUpdatedDate() {
-        return (OffsetDateTime) get(3);
+        return (OffsetDateTime) get(2);
     }
 
     /**
      * Setter for <code>acf.d_tournament_type.created_date</code>.
      */
     public void setCreatedDate(OffsetDateTime value) {
-        set(4, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>acf.d_tournament_type.created_date</code>.
      */
     public OffsetDateTime getCreatedDate() {
-        return (OffsetDateTime) get(4);
+        return (OffsetDateTime) get(3);
+    }
+
+    /**
+     * Setter for <code>acf.d_tournament_type.name_ru</code>.
+     */
+    public void setNameRu(String value) {
+        set(4, value);
+    }
+
+    /**
+     * Getter for <code>acf.d_tournament_type.name_ru</code>.
+     */
+    public String getNameRu() {
+        return (String) get(4);
+    }
+
+    /**
+     * Setter for <code>acf.d_tournament_type.name_kk</code>.
+     */
+    public void setNameKk(String value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>acf.d_tournament_type.name_kk</code>.
+     */
+    public String getNameKk() {
+        return (String) get(5);
+    }
+
+    /**
+     * Setter for <code>acf.d_tournament_type.name_en</code>.
+     */
+    public void setNameEn(String value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>acf.d_tournament_type.name_en</code>.
+     */
+    public String getNameEn() {
+        return (String) get(6);
     }
 
     // -------------------------------------------------------------------------
@@ -113,14 +141,16 @@ public class DTournamentTypeRecord extends UpdatableRecordImpl<DTournamentTypeRe
     /**
      * Create a detached, initialised DTournamentTypeRecord
      */
-    public DTournamentTypeRecord(Long id, String name, Boolean isActive, OffsetDateTime updatedDate, OffsetDateTime createdDate) {
+    public DTournamentTypeRecord(Long id, Boolean isActive, OffsetDateTime updatedDate, OffsetDateTime createdDate, String nameRu, String nameKk, String nameEn) {
         super(DTournamentType.D_TOURNAMENT_TYPE);
 
         setId(id);
-        setName(name);
         setIsActive(isActive);
         setUpdatedDate(updatedDate);
         setCreatedDate(createdDate);
+        setNameRu(nameRu);
+        setNameKk(nameKk);
+        setNameEn(nameEn);
         resetTouchedOnNotNull();
     }
 }

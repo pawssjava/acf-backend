@@ -69,8 +69,12 @@ public class CityService {
     }
 
     public void delete(Long id) {
-        int deleted = dsl.deleteFrom(D_CITY).where(D_CITY.ID.eq(id)).execute();
-        if (deleted == 0) {
+        int updated = dsl.update(D_CITY)
+                .set(D_CITY.IS_ACTIVE, false)
+                .set(D_CITY.UPDATED_DATE, OffsetDateTime.now())
+                .where(D_CITY.ID.eq(id))
+                .execute();
+        if (updated == 0) {
             throw new AppException(HttpStatus.NOT_FOUND,
                 "Қала табылмады",
                 "Город не найден",
