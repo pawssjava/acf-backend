@@ -54,7 +54,8 @@ public class UserService {
                 .where(USER.USERNAME.eq(username))
                 .fetchOptional()
                 .map(this::mapUser)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Пайдаланушы табылмады", "Пользователь не найден", "User not found"));
     }
 
     public UserDto findById(Long id) {
@@ -71,7 +72,8 @@ public class UserService {
                 .where(USER.ID.eq(id))
                 .fetchOptional()
                 .map(this::mapUser)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Пайдаланушы табылмады", "Пользователь не найден", "User not found"));
     }
 
     public UserDto update(Long id, UpdateUserRequest req) {

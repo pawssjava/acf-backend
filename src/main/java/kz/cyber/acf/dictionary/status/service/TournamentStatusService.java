@@ -29,7 +29,8 @@ public class TournamentStatusService {
                 .where(D_TOURNAMENT_STATUS.ID.eq(id))
                 .fetchOptional()
                 .map(r -> new DictionaryDto(r.getId(), r.getName(), r.getIsActive(), r.getCreatedDate(), r.getUpdatedDate()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament status not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Турнир статусы табылмады", "Статус турнира не найден", "Tournament status not found"));
     }
 
     public DictionaryDto create(DictionaryRequest req) {

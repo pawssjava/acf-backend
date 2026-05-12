@@ -36,7 +36,8 @@ public class NewsService {
                 .where(NEWS.ID.eq(id))
                 .fetchOptional()
                 .map(r -> new NewsDto(r.getId(), r.getTitle(), r.getDescription(), resolveUrl(r.getImage()), r.getCreatedDate(), r.getUpdatedDate()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Жаңалық табылмады", "Новость не найдена", "News not found"));
     }
 
     public NewsDto create(NewsRequest req) {

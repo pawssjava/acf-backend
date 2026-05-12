@@ -52,7 +52,8 @@ public class EducationMaterialService {
                 .where(EDUCATION_MATERIAL.ID.eq(id))
                 .fetchOptional()
                 .map(this::toDto)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Education material not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Оқу материалы табылмады", "Учебный материал не найден", "Education material not found"));
     }
 
     public EducationMaterialDto create(String username, EducationMaterialRequest req) {

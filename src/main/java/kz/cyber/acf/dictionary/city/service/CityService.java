@@ -32,7 +32,8 @@ public class CityService {
                 .fetchOptional()
                 .map(r -> new CityDto(r.getId(), r.getNameRu(), r.getNameKk(), r.getNameEn(),
                         r.getIsActive(), r.getCreatedDate(), r.getUpdatedDate()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "City not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Қала табылмады", "Город не найден", "City not found"));
     }
 
     public CityDto create(CityRequest req) {

@@ -32,7 +32,8 @@ public class ClubService {
                 .fetchOptional()
                 .map(r -> new ClubDto(r.getId(), r.getNameRu(), r.getNameKk(), r.getNameEn(),
                         r.getIsActive(), r.getCreatedDate(), r.getUpdatedDate()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Club not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Клуб табылмады", "Клуб не найден", "Club not found"));
     }
 
     public ClubDto create(ClubRequest req) {

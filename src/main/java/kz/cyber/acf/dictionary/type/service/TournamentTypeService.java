@@ -29,7 +29,8 @@ public class TournamentTypeService {
                 .where(D_TOURNAMENT_TYPE.ID.eq(id))
                 .fetchOptional()
                 .map(r -> new DictionaryDto(r.getId(), r.getName(), r.getIsActive(), r.getCreatedDate(), r.getUpdatedDate()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament type not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Турнир түрі табылмады", "Тип турнира не найден", "Tournament type not found"));
     }
 
     public DictionaryDto create(DictionaryRequest req) {

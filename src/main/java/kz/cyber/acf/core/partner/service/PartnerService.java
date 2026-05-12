@@ -37,7 +37,8 @@ public class PartnerService {
                 .where(PARTNER.ID.eq(id))
                 .fetchOptional()
                 .map(r -> toDto(r.getId(), r.getName(), r.getLogo(), r.getDescription(), r.getHyperlink(), r.getCreatedDate(), r.getUpdatedDate()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partner not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Серіктес табылмады", "Партнёр не найден", "Partner not found"));
     }
 
     public PartnerDto create(String username, PartnerRequest req) {

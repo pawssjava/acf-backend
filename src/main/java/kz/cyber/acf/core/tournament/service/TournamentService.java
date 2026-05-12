@@ -9,7 +9,6 @@ import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -121,7 +120,8 @@ public class TournamentService {
                         r.get(TOURNAMENT.PHASE),
                         r.get(TOURNAMENT.TOTAL_ROUNDS)
                 ))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Турнир табылмады", "Турнир не найден", "Tournament not found"));
     }
 
     public TournamentDto create(TournamentRequest req) {

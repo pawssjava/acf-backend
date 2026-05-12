@@ -9,10 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDSLContext;
+import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -53,10 +53,10 @@ public class TournamentMatchService {
 
         boolean alreadyStarted = dsl.fetchExists(TOURNAMENT_MATCH,
                 TOURNAMENT_MATCH.TOURNAMENT_ID.eq(tournamentId));
-        if (alreadyStarted) throw badRequest("Tournament already started");
+        if (alreadyStarted) throw badRequest("Турнир бұрын басталған", "Турнир уже начат", "Tournament already started");
 
         List<Long> participants = fetchParticipants(tournamentId);
-        if (participants.size() < 2) throw badRequest("At least 2 registered participants required");
+        if (participants.size() < 2) throw badRequest("Кемінде 2 тіркелген қатысушы қажет", "Необходимо минимум 2 зарегистрированных участника", "At least 2 registered participants required");
 
         Collections.shuffle(participants);
         OffsetDateTime now = OffsetDateTime.now(ZONE);
@@ -81,8 +81,8 @@ public class TournamentMatchService {
 
     public void nextSwissRound(Long tournamentId) {
         var tournament = loadTournament(tournamentId);
-        if (!FORMAT_SWISS.equals(tournament.getFormat())) throw badRequest("Tournament is not SWISS format");
-        if (!PHASE_SWISS.equals(tournament.getPhase())) throw badRequest("Tournament is not in Swiss phase");
+        if (!FORMAT_SWISS.equals(tournament.getFormat())) throw badRequest("Турнир SWISS форматында емес", "Турнир не в формате SWISS", "Tournament is not SWISS format");
+        if (!PHASE_SWISS.equals(tournament.getPhase())) throw badRequest("Турнир Swiss кезеңінде емес", "Турнир не в фазе Swiss", "Tournament is not in Swiss phase");
 
         Integer currentRound = dsl.select(DSL.max(TOURNAMENT_MATCH.ROUND_NUMBER))
                 .from(TOURNAMENT_MATCH)
@@ -97,7 +97,7 @@ public class TournamentMatchService {
                         .and(TOURNAMENT_MATCH.ROUND_NUMBER.eq(currentRound))
                         .and(TOURNAMENT_MATCH.STATUS.ne(STATUS_COMPLETED))
                         .and(TOURNAMENT_MATCH.STATUS.ne(STATUS_BYE)));
-        if (incomplete) throw badRequest("Current round has incomplete matches");
+        if (incomplete) throw badRequest("Ағымдағы раундта аяқталмаған матчтар бар", "В текущем раунде есть незавершённые матчи", "Current round has incomplete matches");
 
         Integer totalRounds = tournament.getTotalRounds();
         OffsetDateTime now = OffsetDateTime.now(ZONE);
@@ -116,21 +116,21 @@ public class TournamentMatchService {
 
     public void advanceRegularSeason(Long tournamentId, int advancers) {
         var tournament = loadTournament(tournamentId);
-        if (!FORMAT_EKPL.equals(tournament.getFormat())) throw badRequest("Tournament is not eKPL format");
-        if (!PHASE_REGULAR.equals(tournament.getPhase())) throw badRequest("Tournament is not in Regular Season phase");
+        if (!FORMAT_EKPL.equals(tournament.getFormat())) throw badRequest("Турнир eKPL форматында емес", "Турнир не в формате eKPL", "Tournament is not eKPL format");
+        if (!PHASE_REGULAR.equals(tournament.getPhase())) throw badRequest("Турнир тұрақты маусым кезеңінде емес", "Турнир не в фазе регулярного сезона", "Tournament is not in Regular Season phase");
 
         boolean incomplete = dsl.fetchExists(TOURNAMENT_MATCH,
                 TOURNAMENT_MATCH.TOURNAMENT_ID.eq(tournamentId)
                         .and(TOURNAMENT_MATCH.PHASE.eq(PHASE_REGULAR))
                         .and(TOURNAMENT_MATCH.STATUS.ne(STATUS_COMPLETED)));
-        if (incomplete) throw badRequest("All regular season matches must be completed first");
+        if (incomplete) throw badRequest("Алдымен барлық тұрақты маусым матчтары аяқталуы керек", "Сначала должны быть завершены все матчи регулярного сезона", "All regular season matches must be completed first");
 
         List<Long> topPlayers = computeRegularSeasonStandings(tournamentId).stream()
                 .limit(advancers)
                 .map(GroupStandingDto::getUserId)
                 .collect(Collectors.toList());
 
-        if (topPlayers.size() < 2) throw badRequest("Not enough participants to advance");
+        if (topPlayers.size() < 2) throw badRequest("Жылжыту үшін қатысушылар жеткіліксіз", "Недостаточно участников для продвижения", "Not enough participants to advance");
 
         OffsetDateTime now = OffsetDateTime.now(ZONE);
         generatePlayoffBracket(tournamentId, topPlayers, now);
@@ -144,7 +144,7 @@ public class TournamentMatchService {
 
     public TournamentMatchDto updateScore(Long tournamentId, Long matchId, ScoreUpdateRequest req) {
         var match = loadMatch(matchId, tournamentId);
-        if (STATUS_COMPLETED.equals(match.getStatus())) throw badRequest("Match already completed");
+        if (STATUS_COMPLETED.equals(match.getStatus())) throw badRequest("Матч бұрын аяқталған", "Матч уже завершён", "Match already completed");
 
         dsl.update(TOURNAMENT_MATCH)
                 .set(TOURNAMENT_MATCH.SCORE1, req.getScore1())
@@ -159,13 +159,13 @@ public class TournamentMatchService {
 
     public TournamentMatchDto completeMatch(Long tournamentId, Long matchId) {
         var match = loadMatch(matchId, tournamentId);
-        if (STATUS_COMPLETED.equals(match.getStatus())) throw badRequest("Match already completed");
+        if (STATUS_COMPLETED.equals(match.getStatus())) throw badRequest("Матч бұрын аяқталған", "Матч уже завершён", "Match already completed");
 
         int s1 = match.getScore1() != null ? match.getScore1() : 0;
         int s2 = match.getScore2() != null ? match.getScore2() : 0;
 
         if (s1 == s2 && !PHASE_SWISS.equals(match.getPhase())) {
-            throw badRequest("Scores are tied — use setWinner to manually declare the winner");
+            throw badRequest("Есеп тең — жеңімпазды қолмен анықтау үшін setWinner пайдаланыңыз", "Счёт равный — используйте setWinner для ручного определения победителя", "Scores are tied — use setWinner to manually declare the winner");
         }
 
         if (s1 == s2) {
@@ -180,12 +180,12 @@ public class TournamentMatchService {
 
     public TournamentMatchDto setWinner(Long tournamentId, Long matchId, Long winnerId) {
         var match = loadMatch(matchId, tournamentId);
-        if (STATUS_COMPLETED.equals(match.getStatus())) throw badRequest("Match already completed");
+        if (STATUS_COMPLETED.equals(match.getStatus())) throw badRequest("Матч бұрын аяқталған", "Матч уже завершён", "Match already completed");
 
         Long p1 = match.getParticipant1Id();
         Long p2 = match.getParticipant2Id();
         if (!winnerId.equals(p1) && !winnerId.equals(p2))
-            throw badRequest("Winner must be one of the match participants");
+            throw badRequest("Жеңімпаз матч қатысушыларының бірі болуы керек", "Победитель должен быть одним из участников матча", "Winner must be one of the match participants");
 
         Long loserId = winnerId.equals(p1) ? p2 : p1;
         return finalizeMatch(tournamentId, match, winnerId, loserId);
@@ -282,7 +282,7 @@ public class TournamentMatchService {
 
     private TournamentRecord loadTournament(Long tournamentId) {
         var t = dsl.selectFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(tournamentId)).fetchOne();
-        if (t == null) throw notFound("Tournament not found");
+        if (t == null) throw notFound("Турнир табылмады", "Турнир не найден", "Tournament not found");
         return t;
     }
 
@@ -298,7 +298,7 @@ public class TournamentMatchService {
                 .where(TOURNAMENT_MATCH.ID.eq(matchId)
                         .and(TOURNAMENT_MATCH.TOURNAMENT_ID.eq(tournamentId)))
                 .fetchOne();
-        if (match == null) throw notFound("Match not found");
+        if (match == null) throw notFound("Матч табылмады", "Матч не найден", "Match not found");
         return match;
     }
 
@@ -856,7 +856,7 @@ public class TournamentMatchService {
                     dto.setNextMatchId(r.get(TOURNAMENT_MATCH.NEXT_MATCH_ID));
                     return dto;
                 })
-                .orElseThrow(() -> notFound("Match not found"));
+                .orElseThrow(() -> notFound("Матч табылмады", "Матч не найден", "Match not found"));
     }
 
     private String roundName(int round, int maxRound) {
@@ -876,11 +876,11 @@ public class TournamentMatchService {
         return p;
     }
 
-    private ResponseStatusException badRequest(String msg) {
-        return new ResponseStatusException(HttpStatus.BAD_REQUEST, msg);
+    private AppException badRequest(String kz, String ru, String en) {
+        return new AppException(HttpStatus.BAD_REQUEST, kz, ru, en);
     }
 
-    private ResponseStatusException notFound(String msg) {
-        return new ResponseStatusException(HttpStatus.NOT_FOUND, msg);
+    private AppException notFound(String kz, String ru, String en) {
+        return new AppException(HttpStatus.NOT_FOUND, kz, ru, en);
     }
 }
