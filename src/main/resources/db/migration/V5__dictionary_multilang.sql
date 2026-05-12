@@ -52,8 +52,3 @@ update acf.d_tournament_type
 set name_kk = 'EKPL',
     name_en = 'EKPL'
 where id = 5;
-
-alter table acf.d_tournament_status
-    drop column if exists name;
-alter table acf.d_tournament_type
-    drop column if exists name;
