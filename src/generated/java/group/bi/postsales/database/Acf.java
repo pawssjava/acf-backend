@@ -8,6 +8,7 @@ import group.bi.postsales.database.tables.DCity;
 import group.bi.postsales.database.tables.DClub;
 import group.bi.postsales.database.tables.DTournamentStatus;
 import group.bi.postsales.database.tables.DTournamentType;
+import group.bi.postsales.database.tables.EducationMaterial;
 import group.bi.postsales.database.tables.FlywaySchemaHistory;
 import group.bi.postsales.database.tables.News;
 import group.bi.postsales.database.tables.Partner;
@@ -60,6 +61,11 @@ public class Acf extends SchemaImpl {
      * The table <code>acf.d_tournament_type</code>.
      */
     public final DTournamentType D_TOURNAMENT_TYPE = DTournamentType.D_TOURNAMENT_TYPE;
+
+    /**
+     * The table <code>acf.education_material</code>.
+     */
+    public final EducationMaterial EDUCATION_MATERIAL = EducationMaterial.EDUCATION_MATERIAL;
 
     /**
      * The table <code>acf.flyway_schema_history</code>.
@@ -131,6 +137,7 @@ public class Acf extends SchemaImpl {
             DClub.D_CLUB,
             DTournamentStatus.D_TOURNAMENT_STATUS,
             DTournamentType.D_TOURNAMENT_TYPE,
+            EducationMaterial.EDUCATION_MATERIAL,
             FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
             News.NEWS,
             Partner.PARTNER,

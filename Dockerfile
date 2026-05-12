@@ -10,5 +10,5 @@ RUN ./mvnw package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
-EXPOSE 8080
+EXPOSE 9002
 ENTRYPOINT ["java", "-Duser.timezone=Asia/Almaty", "-jar", "app.jar"]
