@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kz.cyber.acf.core.user.dto.PageResponse;
 import kz.cyber.acf.dictionary.club.dto.ClubDto;
 import kz.cyber.acf.dictionary.club.dto.ClubRequest;
 import kz.cyber.acf.dictionary.club.service.ClubService;
@@ -11,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "Dictionary — Clubs", description = "Lookup table for esports clubs.")
 @RestController
@@ -24,8 +23,10 @@ public class ClubController {
 
     @Operation(summary = "List all clubs")
     @GetMapping
-    public List<ClubDto> findAll() {
-        return clubService.findAll();
+    public PageResponse<ClubDto> findAll(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size) {
+        return clubService.findAll(page, size);
     }
 
     @Operation(summary = "Get club by ID",

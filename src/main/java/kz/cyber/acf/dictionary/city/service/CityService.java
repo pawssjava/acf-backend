@@ -1,5 +1,6 @@
 package kz.cyber.acf.dictionary.city.service;
 
+import kz.cyber.acf.core.user.dto.PageResponse;
 import kz.cyber.acf.dictionary.city.dto.CityDto;
 import kz.cyber.acf.dictionary.city.dto.CityRequest;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,20 @@ public class CityService {
 
     private final DefaultDSLContext dsl;
 
-    public List<CityDto> findAll() {
-        return dsl.selectFrom(D_CITY)
+    public PageResponse<CityDto> findAll(int page, int size) {
+        long total = dsl.selectCount()
+                .from(D_CITY)
                 .where(D_CITY.IS_ACTIVE.isTrue())
+                .fetchOne(0, Long.class);
+        List<CityDto> content = dsl.selectFrom(D_CITY)
+                .where(D_CITY.IS_ACTIVE.isTrue())
+                .orderBy(D_CITY.ID.asc())
+                .limit(size)
+                .offset((long) page * size)
                 .fetch(r -> new CityDto(r.getId(), r.getNameRu(), r.getNameKk(), r.getNameEn(),
                         r.getIsActive(), r.getCreatedDate(), r.getUpdatedDate()));
+        int totalPages = size == 0 ? 1 : (int) Math.ceil((double) total / size);
+        return new PageResponse<>(content, page, size, total, totalPages);
     }
 
     public CityDto findById(Long id) {

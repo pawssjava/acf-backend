@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kz.cyber.acf.core.user.dto.PageResponse;
 import kz.cyber.acf.dictionary.city.dto.CityDto;
 import kz.cyber.acf.dictionary.city.dto.CityRequest;
 import kz.cyber.acf.dictionary.city.service.CityService;
@@ -11,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "Dictionary — Cities", description = "Lookup table for cities of Kazakhstan.")
 @RestController
@@ -23,8 +22,10 @@ public class CityController {
 
     @Operation(summary = "List all cities")
     @GetMapping
-    public List<CityDto> findAll() {
-        return cityService.findAll();
+    public PageResponse<CityDto> findAll(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size) {
+        return cityService.findAll(page, size);
     }
 
     @Operation(

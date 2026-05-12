@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kz.cyber.acf.core.user.dto.PageResponse;
 import kz.cyber.acf.dictionary.dto.DictionaryDto;
 import kz.cyber.acf.dictionary.dto.DictionaryRequest;
 import kz.cyber.acf.dictionary.type.service.TournamentTypeService;
@@ -11,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "Dictionary — Tournament Types", description = "Lookup table for tournament types (e.g. Региональные турниры, Социальная лига). Used when creating or filtering tournaments.")
 @RestController
@@ -24,8 +23,10 @@ public class TournamentTypeController {
 
     @Operation(summary = "List all tournament types")
     @GetMapping
-    public List<DictionaryDto> findAll() {
-        return tournamentTypeService.findAll();
+    public PageResponse<DictionaryDto> findAll(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size) {
+        return tournamentTypeService.findAll(page, size);
     }
 
     @Operation(

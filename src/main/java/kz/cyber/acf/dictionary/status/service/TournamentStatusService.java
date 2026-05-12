@@ -1,6 +1,7 @@
 package kz.cyber.acf.dictionary.status.service;
 
 import group.bi.postsales.database.tables.records.DTournamentStatusRecord;
+import kz.cyber.acf.core.user.dto.PageResponse;
 import kz.cyber.acf.dictionary.dto.DictionaryDto;
 import kz.cyber.acf.dictionary.dto.DictionaryRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +21,19 @@ public class TournamentStatusService {
 
     private final DefaultDSLContext dsl;
 
-    public List<DictionaryDto> findAll() {
-        return dsl.selectFrom(D_TOURNAMENT_STATUS)
+    public PageResponse<DictionaryDto> findAll(int page, int size) {
+        long total = dsl.selectCount()
+                .from(D_TOURNAMENT_STATUS)
                 .where(D_TOURNAMENT_STATUS.IS_ACTIVE.isTrue())
+                .fetchOne(0, Long.class);
+        List<DictionaryDto> content = dsl.selectFrom(D_TOURNAMENT_STATUS)
+                .where(D_TOURNAMENT_STATUS.IS_ACTIVE.isTrue())
+                .orderBy(D_TOURNAMENT_STATUS.ID.asc())
+                .limit(size)
+                .offset((long) page * size)
                 .fetch(this::toDto);
+        int totalPages = size == 0 ? 1 : (int) Math.ceil((double) total / size);
+        return new PageResponse<>(content, page, size, total, totalPages);
     }
 
     public DictionaryDto findById(Long id) {

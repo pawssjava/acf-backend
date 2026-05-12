@@ -1,5 +1,6 @@
 package kz.cyber.acf.dictionary.club.service;
 
+import kz.cyber.acf.core.user.dto.PageResponse;
 import kz.cyber.acf.dictionary.club.dto.ClubDto;
 import kz.cyber.acf.dictionary.club.dto.ClubRequest;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,20 @@ public class ClubService {
 
     private final DefaultDSLContext dsl;
 
-    public List<ClubDto> findAll() {
-        return dsl.selectFrom(D_CLUB)
+    public PageResponse<ClubDto> findAll(int page, int size) {
+        long total = dsl.selectCount()
+                .from(D_CLUB)
                 .where(D_CLUB.IS_ACTIVE.isTrue())
+                .fetchOne(0, Long.class);
+        List<ClubDto> content = dsl.selectFrom(D_CLUB)
+                .where(D_CLUB.IS_ACTIVE.isTrue())
+                .orderBy(D_CLUB.ID.asc())
+                .limit(size)
+                .offset((long) page * size)
                 .fetch(r -> new ClubDto(r.getId(), r.getNameRu(), r.getNameKk(), r.getNameEn(),
                         r.getIsActive(), r.getCreatedDate(), r.getUpdatedDate()));
+        int totalPages = size == 0 ? 1 : (int) Math.ceil((double) total / size);
+        return new PageResponse<>(content, page, size, total, totalPages);
     }
 
     public ClubDto findById(Long id) {

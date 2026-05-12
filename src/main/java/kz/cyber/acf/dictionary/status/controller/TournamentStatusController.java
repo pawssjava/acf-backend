@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kz.cyber.acf.core.user.dto.PageResponse;
 import kz.cyber.acf.dictionary.dto.DictionaryDto;
 import kz.cyber.acf.dictionary.dto.DictionaryRequest;
 import kz.cyber.acf.dictionary.status.service.TournamentStatusService;
@@ -11,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "Dictionary — Tournament Statuses", description = "Lookup table for tournament statuses (Активные, Будущие, Завершенные). Used when creating or filtering tournaments.")
 @RestController
@@ -24,8 +23,10 @@ public class TournamentStatusController {
 
     @Operation(summary = "List all tournament statuses")
     @GetMapping
-    public List<DictionaryDto> findAll() {
-        return tournamentStatusService.findAll();
+    public PageResponse<DictionaryDto> findAll(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size) {
+        return tournamentStatusService.findAll(page, size);
     }
 
     @Operation(
