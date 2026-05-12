@@ -10,10 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.impl.DefaultDSLContext;
 import org.jooq.impl.DSL;
+import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -80,7 +80,10 @@ public class EducationMaterialService {
                 .where(EDUCATION_MATERIAL.ID.eq(id))
                 .returning()
                 .fetchOne();
-        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Education material not found");
+        if (record == null) throw new AppException(HttpStatus.NOT_FOUND,
+                "Оқу материалы табылмады",
+                "Учебный материал не найден",
+                "Education material not found");
         return toDto(record);
     }
 
@@ -93,7 +96,10 @@ public class EducationMaterialService {
                 .where(EDUCATION_MATERIAL.ID.eq(id))
                 .returning()
                 .fetchOne();
-        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Education material not found");
+        if (record == null) throw new AppException(HttpStatus.NOT_FOUND,
+                "Оқу материалы табылмады",
+                "Учебный материал не найден",
+                "Education material not found");
         return toDto(record);
     }
 
@@ -106,7 +112,10 @@ public class EducationMaterialService {
                 .where(EDUCATION_MATERIAL.ID.eq(id))
                 .returning()
                 .fetchOne();
-        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Education material not found");
+        if (record == null) throw new AppException(HttpStatus.NOT_FOUND,
+                "Оқу материалы табылмады",
+                "Учебный материал не найден",
+                "Education material not found");
         return toDto(record);
     }
 
@@ -119,14 +128,20 @@ public class EducationMaterialService {
                 .where(EDUCATION_MATERIAL.ID.eq(id))
                 .returning()
                 .fetchOne();
-        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Education material not found");
+        if (record == null) throw new AppException(HttpStatus.NOT_FOUND,
+                "Оқу материалы табылмады",
+                "Учебный материал не найден",
+                "Education material not found");
         return toDto(record);
     }
 
     public void delete(String username, Long id) {
         userService.requireAdmin(username);
         int deleted = dsl.deleteFrom(EDUCATION_MATERIAL).where(EDUCATION_MATERIAL.ID.eq(id)).execute();
-        if (deleted == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Education material not found");
+        if (deleted == 0) throw new AppException(HttpStatus.NOT_FOUND,
+                "Оқу материалы табылмады",
+                "Учебный материал не найден",
+                "Education material not found");
     }
 
     private EducationMaterialDto toDto(EducationMaterialRecord record) {

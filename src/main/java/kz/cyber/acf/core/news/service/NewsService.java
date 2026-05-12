@@ -5,10 +5,10 @@ import kz.cyber.acf.core.news.dto.NewsRequest;
 import kz.cyber.acf.storage.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
+import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -58,7 +58,10 @@ public class NewsService {
                 .where(NEWS.ID.eq(id))
                 .returning()
                 .fetchOne();
-        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found");
+        if (record == null) throw new AppException(HttpStatus.NOT_FOUND,
+                    "Жаңалық табылмады",
+                    "Новость не найдена",
+                    "News not found");
         return new NewsDto(record.getId(), record.getTitle(), record.getDescription(), resolveUrl(record.getImage()), record.getCreatedDate(), record.getUpdatedDate());
     }
 
@@ -70,14 +73,20 @@ public class NewsService {
                 .where(NEWS.ID.eq(id))
                 .returning()
                 .fetchOne();
-        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found");
+        if (record == null) throw new AppException(HttpStatus.NOT_FOUND,
+                    "Жаңалық табылмады",
+                    "Новость не найдена",
+                    "News not found");
         return new NewsDto(record.getId(), record.getTitle(), record.getDescription(), resolveUrl(record.getImage()), record.getCreatedDate(), record.getUpdatedDate());
     }
 
     public void delete(Long id) {
         int deleted = dsl.deleteFrom(NEWS).where(NEWS.ID.eq(id)).execute();
         if (deleted == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Жаңалық табылмады",
+                    "Новость не найдена",
+                    "News not found");
         }
     }
 

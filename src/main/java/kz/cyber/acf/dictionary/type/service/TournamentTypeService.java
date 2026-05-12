@@ -4,9 +4,9 @@ import kz.cyber.acf.dictionary.dto.DictionaryDto;
 import kz.cyber.acf.dictionary.dto.DictionaryRequest;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
+import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -51,14 +51,20 @@ public class TournamentTypeService {
                 .where(D_TOURNAMENT_TYPE.ID.eq(id))
                 .returning()
                 .fetchOne();
-        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament type not found");
+        if (record == null) throw new AppException(HttpStatus.NOT_FOUND,
+                "Турнир түрі табылмады",
+                "Тип турнира не найден",
+                "Tournament type not found");
         return new DictionaryDto(record.getId(), record.getName(), record.getIsActive(), record.getCreatedDate(), record.getUpdatedDate());
     }
 
     public void delete(Long id) {
         int deleted = dsl.deleteFrom(D_TOURNAMENT_TYPE).where(D_TOURNAMENT_TYPE.ID.eq(id)).execute();
         if (deleted == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament type not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                "Турнир түрі табылмады",
+                "Тип турнира не найден",
+                "Tournament type not found");
         }
     }
 }

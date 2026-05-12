@@ -5,6 +5,7 @@ import kz.cyber.acf.core.tournament.dto.TournamentRequest;
 import kz.cyber.acf.storage.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
+import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -145,14 +146,17 @@ public class TournamentService {
 
     public TournamentDto update(Long id, TournamentRequest req) {
         var existing = dsl.selectFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(id)).fetchOne();
-        if (existing == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+        if (existing == null) throw new AppException(HttpStatus.NOT_FOUND,
+                "Турнир табылмады", "Турнир не найден", "Tournament not found");
 
         rejectIfNotEditable(existing.getTournamentStatus());
 
         if (existing.getPhase() != null && req.getFormat() != null
                 && !req.getFormat().equals(existing.getFormat())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Cannot change format after tournament has started");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Турнир басталғаннан кейін форматты өзгерту мүмкін емес",
+                    "Нельзя изменить формат после начала турнира",
+                    "Cannot change format after the tournament has started");
         }
 
         String effectiveFormat = req.getFormat() != null ? req.getFormat() : existing.getFormat();
@@ -173,13 +177,15 @@ public class TournamentService {
                 .where(TOURNAMENT.ID.eq(id))
                 .execute();
 
-        if (updated == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+        if (updated == 0) throw new AppException(HttpStatus.NOT_FOUND,
+                "Турнир табылмады", "Турнир не найден", "Tournament not found");
         return findById(id);
     }
 
     public TournamentDto uploadLogo(Long id, MultipartFile file) {
         var existing = dsl.selectFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(id)).fetchOne();
-        if (existing == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+        if (existing == null) throw new AppException(HttpStatus.NOT_FOUND,
+                "Турнир табылмады", "Турнир не найден", "Tournament not found");
         rejectIfNotEditable(existing.getTournamentStatus());
         String objectName = minioService.upload(FOLDER, file);
         dsl.update(TOURNAMENT)
@@ -208,28 +214,37 @@ public class TournamentService {
 
     public void delete(Long id) {
         int deleted = dsl.deleteFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(id)).execute();
-        if (deleted == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+        if (deleted == 0) throw new AppException(HttpStatus.NOT_FOUND,
+                "Турнир табылмады", "Турнир не найден", "Tournament not found");
     }
 
     private void rejectIfNotEditable(Long statusId) {
         if (STATUS_ACTIVE.equals(statusId) || STATUS_COMPLETED.equals(statusId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Турнир басталған немесе аяқталғаннан кейін өңдеу мүмкін емес",
+                    "Турнир нельзя редактировать после начала или завершения",
                     "Tournament cannot be edited after it has started or finished");
         }
     }
 
     private void validateFormat(String format, Long tournamentTypeId) {
         if (format != null && !VALID_FORMATS.contains(format)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Invalid format. Allowed: SINGLE_ELIMINATION, SWISS, EKPL");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Жарамсыз формат. Рұқсат берілген: SINGLE_ELIMINATION, SWISS, EKPL",
+                    "Неверный формат. Допустимые: SINGLE_ELIMINATION, SWISS, EKPL",
+                    "Invalid format. Allowed values: SINGLE_ELIMINATION, SWISS, EKPL");
         }
         if (FORMAT_EKPL.equals(format) && !TYPE_EKPL.equals(tournamentTypeId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "EKPL форматы тек 5 (eKPL) турнир түріне рұқсат етілген",
+                    "Формат EKPL разрешён только для типа турнира 5 (eKPL)",
                     "EKPL format is only allowed for tournament type 5 (eKPL)");
         }
         if (TYPE_EKPL.equals(tournamentTypeId) && format != null && !FORMAT_EKPL.equals(format)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Tournament type eKPL (id=5) must use EKPL format");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "eKPL турнир түрі EKPL форматын қолдануы керек",
+                    "Тип турнира eKPL должен использовать формат EKPL",
+                    "Tournament type eKPL must use EKPL format");
         }
     }
 

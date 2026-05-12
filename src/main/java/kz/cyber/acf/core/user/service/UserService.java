@@ -4,10 +4,10 @@ import kz.cyber.acf.core.user.dto.*;
 import kz.cyber.acf.storage.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
+import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -85,7 +85,10 @@ public class UserService {
                 .where(USER.ID.eq(id))
                 .execute();
         if (updated == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Пайдаланушы табылмады",
+                    "Пользователь не найден",
+                    "User not found");
         }
         return findById(id);
     }
@@ -118,14 +121,20 @@ public class UserService {
                 .where(USER.USERNAME.eq(username))
                 .fetchOneInto(Boolean.class);
         if (!Boolean.TRUE.equals(isAdmin)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin access required");
+            throw new AppException(HttpStatus.FORBIDDEN,
+                    "Администратор рұқсаты қажет",
+                    "Требуется доступ администратора",
+                    "Admin access required");
         }
     }
 
     public void delete(Long id) {
         int deleted = dsl.deleteFrom(USER).where(USER.ID.eq(id)).execute();
         if (deleted == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Пайдаланушы табылмады",
+                    "Пользователь не найден",
+                    "User not found");
         }
     }
 

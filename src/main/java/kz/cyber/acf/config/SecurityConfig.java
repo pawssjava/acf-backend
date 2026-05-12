@@ -45,17 +45,20 @@ public class SecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, e) ->
-                                writeError(response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized", "Authentication required"))
+                                writeError(response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized",
+                                        "Аутентификация қажет", "Требуется аутентификация", "Authentication required"))
                         .accessDeniedHandler((request, response, e) ->
-                                writeError(response, HttpServletResponse.SC_FORBIDDEN, "Forbidden", "Access denied"))
+                                writeError(response, HttpServletResponse.SC_FORBIDDEN, "Forbidden",
+                                        "Қолжетімділік жоқ", "Доступ запрещён", "Access denied"))
                 );
 
         return http.build();
     }
 
-    private void writeError(HttpServletResponse response, int status, String error, String message) throws java.io.IOException {
+    private void writeError(HttpServletResponse response, int status, String error,
+                             String errorKz, String errorRu, String errorEn) throws java.io.IOException {
         response.setStatus(status);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        objectMapper.writeValue(response.getWriter(), new ErrorResponse(status, error, message));
+        objectMapper.writeValue(response.getWriter(), new ErrorResponse(status, error, errorKz, errorRu, errorEn));
     }
 }

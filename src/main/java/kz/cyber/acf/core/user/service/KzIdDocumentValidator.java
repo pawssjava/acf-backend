@@ -1,12 +1,12 @@
 package kz.cyber.acf.core.user.service;
 
+import kz.cyber.acf.config.AppException;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -39,28 +39,37 @@ public class KzIdDocumentValidator {
 
     private void assertIsPdf(byte[] bytes) {
         if (bytes.length < 5 || !new String(bytes, 0, 5).equals("%PDF-")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Принимаются только PDF-файлы");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Тек PDF файлдары қабылданады",
+                    "Принимаются только PDF-файлы",
+                    "Only PDF files are accepted");
         }
     }
 
     private void assertHasIin(String text) {
         if (!IIN_PATTERN.matcher(text).find()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Документ не содержит корректный 12-значный ИИН");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Құжатта жарамды 12 таңбалы ЖСН жоқ",
+                    "Документ не содержит корректный 12-значный ИИН",
+                    "Document does not contain a valid 12-digit IIN");
         }
     }
 
     private void assertHasIssuingAuthority(String text) {
         if (!text.contains("ІШКІ ІСТЕР") && !text.contains("МВД") && !text.contains("МИНИСТРЛІГІ")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Документ не является удостоверением личности, выданным органами Республики Казахстан");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Құжат Қазақстан Республикасының органдары берген жеке куәлік емес",
+                    "Документ не является удостоверением личности, выданным органами Республики Казахстан",
+                    "Document is not an identity card issued by the Republic of Kazakhstan");
         }
     }
 
     private void assertHasMrz(String text) {
         if (!text.contains("<<<<")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Документ не содержит машиночитаемую зону (MRZ)");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Құжатта машина оқылатын аймақ (MRZ) жоқ",
+                    "Документ не содержит машиночитаемую зону (MRZ)",
+                    "Document does not contain a machine-readable zone (MRZ)");
         }
     }
 
@@ -70,8 +79,10 @@ public class KzIdDocumentValidator {
         try {
             LocalDate expiry = LocalDate.parse(m.group(2), DATE_FMT);
             if (expiry.isBefore(LocalDate.now())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Срок действия документа истёк " + m.group(2));
+                throw new AppException(HttpStatus.BAD_REQUEST,
+                        "Құжаттың жарамдылық мерзімі өтіп кетті: " + m.group(2),
+                        "Срок действия документа истёк: " + m.group(2),
+                        "Document expired on: " + m.group(2));
             }
         } catch (DateTimeParseException ignored) {
         }
@@ -83,7 +94,10 @@ public class KzIdDocumentValidator {
         try {
             return file.getBytes();
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось прочитать загруженный файл");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Жүктелген файлды оқу мүмкін болмады",
+                    "Не удалось прочитать загруженный файл",
+                    "Failed to read the uploaded file");
         }
     }
 
@@ -91,7 +105,10 @@ public class KzIdDocumentValidator {
         try (PDDocument doc = Loader.loadPDF(bytes)) {
             return new PDFTextStripper().getText(doc);
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Не удалось обработать PDF-файл");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "PDF файлын өңдеу мүмкін болмады",
+                    "Не удалось обработать PDF-файл",
+                    "Failed to process the PDF file");
         }
     }
 }

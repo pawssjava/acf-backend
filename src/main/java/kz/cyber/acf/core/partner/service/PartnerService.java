@@ -6,10 +6,10 @@ import kz.cyber.acf.core.user.service.UserService;
 import kz.cyber.acf.storage.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
+import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -63,7 +63,10 @@ public class PartnerService {
                 .where(PARTNER.ID.eq(id))
                 .returning()
                 .fetchOne();
-        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partner not found");
+        if (record == null) throw new AppException(HttpStatus.NOT_FOUND,
+                "Серіктес табылмады",
+                "Партнёр не найден",
+                "Partner not found");
         return toDto(record.getId(), record.getName(), record.getLogo(), record.getDescription(), record.getHyperlink(), record.getCreatedDate(), record.getUpdatedDate());
     }
 
@@ -76,7 +79,10 @@ public class PartnerService {
                 .where(PARTNER.ID.eq(id))
                 .returning()
                 .fetchOne();
-        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partner not found");
+        if (record == null) throw new AppException(HttpStatus.NOT_FOUND,
+                "Серіктес табылмады",
+                "Партнёр не найден",
+                "Partner not found");
         return toDto(record.getId(), record.getName(), record.getLogo(), record.getDescription(), record.getHyperlink(), record.getCreatedDate(), record.getUpdatedDate());
     }
 
@@ -84,7 +90,10 @@ public class PartnerService {
         userService.requireAdmin(username);
         int deleted = dsl.deleteFrom(PARTNER).where(PARTNER.ID.eq(id)).execute();
         if (deleted == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Partner not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                "Серіктес табылмады",
+                "Партнёр не найден",
+                "Partner not found");
         }
     }
 

@@ -4,9 +4,9 @@ import kz.cyber.acf.core.result.dto.ResultDto;
 import kz.cyber.acf.core.result.dto.ResultRequest;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
+import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -67,7 +67,10 @@ public class ResultService {
                         .and(TOURNAMENT_RESULT.USER_ID.eq(userId)))
                 .execute();
         if (updated == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Result not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Нәтиже табылмады",
+                    "Результат не найден",
+                    "Result not found");
         }
         return findResult(tournamentId, userId);
     }
@@ -108,7 +111,10 @@ public class ResultService {
                         .and(TOURNAMENT_RESULT.USER_ID.eq(userId)))
                 .execute();
         if (deleted == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Result not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Нәтиже табылмады",
+                    "Результат не найден",
+                    "Result not found");
         }
     }
 }

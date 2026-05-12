@@ -14,9 +14,9 @@ import kz.cyber.acf.core.user.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
 import org.springframework.beans.factory.annotation.Value;
+import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -50,21 +50,30 @@ public class AuthService {
 
     public void verifySms(String phone, String code) {
         if (!smsService.verifyCode(phone, code)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid SMS code");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "SMS коды қате",
+                    "Неверный SMS-код",
+                    "Invalid SMS code");
         }
     }
 
     public void checkPhoneAvailable(String phone) {
         boolean exists = dsl.fetchExists(USER, USER.PHONE_NUMBER.eq(Long.parseLong(phone)));
         if (exists) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Phone number already registered");
+            throw new AppException(HttpStatus.CONFLICT,
+                    "Телефон нөмірі тіркелген",
+                    "Номер телефона уже зарегистрирован",
+                    "Phone number already registered");
         }
     }
 
     public void checkUsernameAvailable(String username) {
         boolean exists = dsl.fetchExists(USER, USER.USERNAME.eq(username));
         if (exists) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken");
+            throw new AppException(HttpStatus.CONFLICT,
+                    "Пайдаланушы аты бос емес",
+                    "Имя пользователя уже занято",
+                    "Username already taken");
         }
     }
 
@@ -97,7 +106,10 @@ public class AuthService {
 
     public UserDto register(RegisterRequest req) {
         if (!smsService.isVerified(req.getPhone())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phone number not verified");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Телефон нөмірі расталмаған",
+                    "Номер телефона не подтверждён",
+                    "Phone number not verified");
         }
 
         createKeycloakUser(req);
@@ -128,7 +140,8 @@ public class AuthService {
         dsl.selectFrom(USER)
                 .where(USER.PHONE_NUMBER.eq(Long.parseLong(phone)))
                 .fetchOptional()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Пайдаланушы табылмады", "Пользователь не найден", "User not found"));
 
         smsService.sendCode(phone, SmsAction.FORGOT_PASSWORD);
     }
@@ -137,13 +150,19 @@ public class AuthService {
         try {
             login(username, currentPassword);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current password is incorrect");
+            throw new AppException(HttpStatus.UNAUTHORIZED,
+                    "Ағымдағы құпия сөз қате",
+                    "Текущий пароль неверен",
+                    "Current password is incorrect");
         }
 
         String adminToken = "Bearer " + adminToken().getAccessToken();
         List<KeycloakUserResponse> users = keycloakAdminClient.findUsers(adminToken, realm, username, true);
         if (users.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Keycloak user not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Пайдаланушы табылмады",
+                    "Пользователь не найден",
+                    "User not found");
         }
 
         keycloakAdminClient.resetPassword(
@@ -154,20 +173,27 @@ public class AuthService {
 
     public void resetPassword(ForgotPasswordRequest req) {
         if (!smsService.isVerified(req.getPhone())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Phone number not verified");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Телефон нөмірі расталмаған",
+                    "Номер телефона не подтверждён",
+                    "Phone number not verified");
         }
 
         String username = dsl.selectFrom(USER)
                 .where(USER.PHONE_NUMBER.eq(Long.parseLong(req.getPhone())))
                 .fetchOptional()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"))
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
+                        "Пайдаланушы табылмады", "Пользователь не найден", "User not found"))
                 .getUsername();
 
         String adminToken = "Bearer " + adminToken().getAccessToken();
 
         List<KeycloakUserResponse> users = keycloakAdminClient.findUsers(adminToken, realm, username, true);
         if (users.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Keycloak user not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Пайдаланушы табылмады",
+                    "Пользователь не найден",
+                    "User not found");
         }
 
         keycloakAdminClient.resetPassword(

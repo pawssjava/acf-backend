@@ -4,9 +4,9 @@ import kz.cyber.acf.dictionary.club.dto.ClubDto;
 import kz.cyber.acf.dictionary.club.dto.ClubRequest;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
+import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -59,7 +59,10 @@ public class ClubService {
                 .where(D_CLUB.ID.eq(id))
                 .returning()
                 .fetchOne();
-        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Club not found");
+        if (record == null) throw new AppException(HttpStatus.NOT_FOUND,
+                "Клуб табылмады",
+                "Клуб не найден",
+                "Club not found");
         return new ClubDto(record.getId(), record.getNameRu(), record.getNameKk(), record.getNameEn(),
                 record.getIsActive(), record.getCreatedDate(), record.getUpdatedDate());
     }
@@ -67,7 +70,10 @@ public class ClubService {
     public void delete(Long id) {
         int deleted = dsl.deleteFrom(D_CLUB).where(D_CLUB.ID.eq(id)).execute();
         if (deleted == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Club not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                "Клуб табылмады",
+                "Клуб не найден",
+                "Club not found");
         }
     }
 }

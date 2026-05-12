@@ -4,9 +4,9 @@ import kz.cyber.acf.core.registration.dto.ParticipantDto;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDSLContext;
+import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -21,7 +21,10 @@ public class RegistrationService {
 
     public ParticipantDto register(Long tournamentId, Long userId, String psn) {
         if (psn == null || psn.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PSN is mandatory");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "PSN міндетті",
+                    "PSN обязателен",
+                    "PSN is mandatory");
         }
 
         var tournamentRow = dsl.select(TOURNAMENT.CAPACITY, D_TOURNAMENT_STATUS.NAME.as("status_name"))
@@ -30,10 +33,16 @@ public class RegistrationService {
                 .where(TOURNAMENT.ID.eq(tournamentId))
                 .fetchOne();
         if (tournamentRow == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Турнир табылмады",
+                    "Турнир не найден",
+                    "Tournament not found");
         }
         if (!"Будущие".equals(tournamentRow.get("status_name", String.class))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Registration is only allowed for upcoming tournaments");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Тіркеу тек алдағы турнирлерге рұқсат етілген",
+                    "Регистрация разрешена только для предстоящих турниров",
+                    "Registration is only allowed for upcoming tournaments");
         }
 
         var userRow = dsl.select(
@@ -48,17 +57,26 @@ public class RegistrationService {
                 .where(USER.ID.eq(userId))
                 .fetchOne();
         if (userRow == null || !Boolean.TRUE.equals(userRow.get(USER.IS_VERIFIED))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Document verification required to register for tournaments");
+            throw new AppException(HttpStatus.FORBIDDEN,
+                    "Турнирге тіркелу үшін құжат верификациясы қажет",
+                    "Для регистрации на турнир необходима верификация документов",
+                    "Document verification is required to register for tournaments");
         }
         if (Boolean.TRUE.equals(userRow.get("already_registered", Boolean.class))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already registered for this tournament");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Пайдаланушы осы турнирге тіркелген",
+                    "Пользователь уже зарегистрирован на этот турнир",
+                    "User is already registered for this tournament");
         }
 
         Integer capacity = tournamentRow.get(TOURNAMENT.CAPACITY);
         if (capacity != null) {
             int currentCount = dsl.fetchCount(TOURNAMENT_REGISTRATION, TOURNAMENT_REGISTRATION.TOURNAMENT_ID.eq(tournamentId));
             if (currentCount >= capacity) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tournament is full");
+                throw new AppException(HttpStatus.BAD_REQUEST,
+                        "Турнир толы",
+                        "Турнир заполнен",
+                        "Tournament is full");
             }
         }
 
@@ -104,10 +122,16 @@ public class RegistrationService {
                 .where(TOURNAMENT.ID.eq(tournamentId))
                 .fetchOneInto(String.class);
         if (statusName == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Tournament not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Турнир табылмады",
+                    "Турнир не найден",
+                    "Tournament not found");
         }
         if (!"Будущие".equals(statusName)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unregistration is only allowed for upcoming tournaments");
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Тіркеуді болдырмау тек алдағы турнирлерге рұқсат етілген",
+                    "Отмена регистрации разрешена только для предстоящих турниров",
+                    "Unregistration is only allowed for upcoming tournaments");
         }
 
         String psn = dsl.select(TOURNAMENT_REGISTRATION.PSN)
@@ -121,7 +145,10 @@ public class RegistrationService {
                         .and(TOURNAMENT_REGISTRATION.USER_ID.eq(userId)))
                 .execute();
         if (deleted == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Registration not found");
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Тіркеу табылмады",
+                    "Регистрация не найдена",
+                    "Registration not found");
         }
 
         registrationLogService.log(tournamentId, userId, RegistrationLogService.ACTION_UNREGISTER, psn);
