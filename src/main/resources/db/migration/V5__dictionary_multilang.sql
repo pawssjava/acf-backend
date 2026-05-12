@@ -3,19 +3,10 @@ alter table acf.d_tournament_status
     add column if not exists name_kk varchar,
     add column if not exists name_en varchar;
 
-update acf.d_tournament_status
-set name_ru = name
-where name_ru is null;
-
 alter table acf.d_tournament_type
     add column if not exists name_ru varchar,
     add column if not exists name_kk varchar,
     add column if not exists name_en varchar;
-
-update acf.d_tournament_type
-set name_ru = name
-where name_ru is null;
-
 
 -- tournament statuses
 update acf.d_tournament_status
