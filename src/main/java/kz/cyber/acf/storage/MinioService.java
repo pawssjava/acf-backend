@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -20,7 +21,6 @@ public class MinioService {
 
     public String upload(String folder, MultipartFile file) {
         try {
-            ensureBucket();
             String objectName = folder + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
             minioClient.putObject(
                     PutObjectArgs.builder()
@@ -63,6 +63,10 @@ public class MinioService {
     }
 
     public String presignedUrl(String objectName, int expiryHours) {
+        return presignedUrl(objectName, expiryHours, Map.of());
+    }
+
+    public String presignedUrl(String objectName, int expiryHours, Map<String, String> responseHeaders) {
         try {
             return minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
@@ -70,6 +74,7 @@ public class MinioService {
                             .bucket(BUCKET)
                             .object(objectName)
                             .expiry(expiryHours, TimeUnit.HOURS)
+                            .extraQueryParams(responseHeaders)
                             .build()
             );
         } catch (Exception e) {
