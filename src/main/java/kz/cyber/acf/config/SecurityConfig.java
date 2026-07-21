@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/tournaments", "/api/tournaments/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/dictionary/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/education", "/api/education/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/documents/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
