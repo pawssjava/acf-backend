@@ -52,7 +52,7 @@ public class UserService {
                 .from(USER)
                 .leftJoin(D_CITY).on(USER.CITY_ID.eq(D_CITY.ID))
                 .leftJoin(D_CLUB).on(USER.CLUB_ID.eq(D_CLUB.ID))
-                .where(USER.USERNAME.eq(username))
+                .where(USER.USERNAME.eq(normalize(username)))
                 .fetchOptional()
                 .map(this::mapUser)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
@@ -143,9 +143,13 @@ public class UserService {
     private boolean isAdminUsername(String username) {
         Boolean isAdmin = dsl.select(USER.IS_ADMIN)
                 .from(USER)
-                .where(USER.USERNAME.eq(username))
+                .where(USER.USERNAME.eq(normalize(username)))
                 .fetchOneInto(Boolean.class);
         return Boolean.TRUE.equals(isAdmin);
+    }
+
+    private static String normalize(String username) {
+        return username == null ? null : username.trim().toLowerCase();
     }
 
     public void delete(Long id) {

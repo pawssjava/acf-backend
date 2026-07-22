@@ -68,7 +68,7 @@ public class AuthService {
     }
 
     public void checkUsernameAvailable(String username) {
-        boolean exists = dsl.fetchExists(USER, USER.USERNAME.eq(username));
+        boolean exists = dsl.fetchExists(USER, USER.USERNAME.eq(normalize(username)));
         if (exists) {
             throw new AppException(HttpStatus.CONFLICT,
                     "Пайдаланушы аты бос емес",
@@ -82,7 +82,7 @@ public class AuthService {
         form.add("client_id", clientId);
         form.add("client_secret", clientSecret);
         form.add("grant_type", "password");
-        form.add("username", username);
+        form.add("username", normalize(username));
         form.add("password", password);
         return keycloakTokenClient.token(realm, form);
     }
@@ -147,6 +147,7 @@ public class AuthService {
     }
 
     public void changePassword(String username, String currentPassword, String newPassword) {
+        username = normalize(username);
         try {
             login(username, currentPassword);
         } catch (Exception e) {
@@ -216,6 +217,10 @@ public class AuthService {
                 .build();
 
         keycloakAdminClient.createUser(adminToken, realm, keycloakUser);
+    }
+
+    private static String normalize(String username) {
+        return username == null ? null : username.trim().toLowerCase();
     }
 
     private TokenResponse adminToken() {

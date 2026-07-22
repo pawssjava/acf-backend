@@ -11,4 +11,8 @@ public class RegisterRequest {
     private String firstName;
     private String lastName;
     private LocalDate birthDate;
+
+    public void setUsername(String username) {
+        this.username = username == null ? null : username.trim().toLowerCase();
+    }
 }
