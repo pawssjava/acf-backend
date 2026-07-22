@@ -1,5 +1,8 @@
 package kz.cyber.acf.storage;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Expiry;
 import io.minio.*;
 import io.minio.http.Method;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -16,8 +20,34 @@ import java.util.concurrent.TimeUnit;
 public class MinioService {
 
     private static final String BUCKET = "acf";
+    private static final int MAX_CACHE_HOURS = 6;
 
     private final MinioClient minioClient;
+
+    // Cached URL TTL is capped at MAX_CACHE_HOURS so an entry is never served
+    // after the presigned URL itself has expired in MinIO (see expiryHours).
+    private final Cache<String, CachedUrl> presignedUrlCache = Caffeine.newBuilder()
+            .maximumSize(10_000)
+            .expireAfter(new Expiry<String, CachedUrl>() {
+                @Override
+                public long expireAfterCreate(String key, CachedUrl value, long currentTime) {
+                    return TimeUnit.HOURS.toNanos(Math.min(MAX_CACHE_HOURS, value.expiryHours()));
+                }
+
+                @Override
+                public long expireAfterUpdate(String key, CachedUrl value, long currentTime, long currentDuration) {
+                    return currentDuration;
+                }
+
+                @Override
+                public long expireAfterRead(String key, CachedUrl value, long currentTime, long currentDuration) {
+                    return currentDuration;
+                }
+            })
+            .build();
+
+    private record CachedUrl(String url, int expiryHours) {
+    }
 
     public String upload(String folder, MultipartFile file) {
         try {
@@ -67,6 +97,13 @@ public class MinioService {
     }
 
     public String presignedUrl(String objectName, int expiryHours, Map<String, String> responseHeaders) {
+        String cacheKey = objectName + "|" + expiryHours + "|" + new TreeMap<>(responseHeaders);
+        return presignedUrlCache.get(cacheKey, key ->
+                new CachedUrl(generatePresignedUrl(objectName, expiryHours, responseHeaders), expiryHours)
+        ).url();
+    }
+
+    private String generatePresignedUrl(String objectName, int expiryHours, Map<String, String> responseHeaders) {
         try {
             return minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()

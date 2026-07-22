@@ -106,6 +106,12 @@
             <version>8.5.17</version>
         </dependency>
 
+        <!-- Caffeine cache — used to cache presigned MinIO URLs -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
         <!-- PDF text extraction for KZ ID document validation -->
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
