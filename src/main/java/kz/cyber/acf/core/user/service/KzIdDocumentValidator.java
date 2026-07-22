@@ -56,7 +56,8 @@ public class KzIdDocumentValidator {
     }
 
     private void assertHasIssuingAuthority(String text) {
-        if (!text.contains("ІШКІ ІСТЕР") && !text.contains("МВД") && !text.contains("МИНИСТРЛІГІ")) {
+        if (!text.contains("ІШКІ ІСТЕР") && !text.contains("МВД") && !text.contains("МИНИСТРЛІГІ")
+                && !text.contains("ВНУТРЕННИХ ДЕЛ")) {
             throw new AppException(HttpStatus.BAD_REQUEST,
                     "Құжат Қазақстан Республикасының органдары берген жеке куәлік емес",
                     "Документ не является удостоверением личности, выданным органами Республики Казахстан",
