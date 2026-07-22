@@ -33,7 +33,7 @@ public class TournamentService {
     private final DefaultDSLContext dsl;
     private final MinioService minioService;
 
-    public List<TournamentDto> findAll(Long tournamentTypeId) {
+    public List<TournamentDto> findAll(Long tournamentTypeId, List<Long> disciplineIds) {
         var query = dsl.select(
                         TOURNAMENT.ID,
                         TOURNAMENT.NAME,
@@ -50,6 +50,10 @@ public class TournamentService {
                         D_TOURNAMENT_TYPE.NAME_RU.as("type_name_ru"),
                         D_TOURNAMENT_TYPE.NAME_KK.as("type_name_kk"),
                         D_TOURNAMENT_TYPE.NAME_EN.as("type_name_en"),
+                        TOURNAMENT.DISCIPLINE_ID,
+                        D_DISCIPLINE.NAME_RU.as("discipline_name_ru"),
+                        D_DISCIPLINE.NAME_KK.as("discipline_name_kk"),
+                        D_DISCIPLINE.NAME_EN.as("discipline_name_en"),
                         TOURNAMENT.CREATED_DATE,
                         TOURNAMENT.UPDATED_DATE,
                         TOURNAMENT.FORMAT,
@@ -59,9 +63,13 @@ public class TournamentService {
                 .from(TOURNAMENT)
                 .leftJoin(D_TOURNAMENT_STATUS).on(TOURNAMENT.TOURNAMENT_STATUS.eq(D_TOURNAMENT_STATUS.ID))
                 .leftJoin(D_TOURNAMENT_TYPE).on(TOURNAMENT.TOURNAMENT_TYPE.eq(D_TOURNAMENT_TYPE.ID))
+                .leftJoin(D_DISCIPLINE).on(TOURNAMENT.DISCIPLINE_ID.eq(D_DISCIPLINE.ID))
                 .where(tournamentTypeId == null
                         ? org.jooq.impl.DSL.noCondition()
                         : TOURNAMENT.TOURNAMENT_TYPE.eq(tournamentTypeId))
+                .and(disciplineIds == null || disciplineIds.isEmpty()
+                        ? org.jooq.impl.DSL.noCondition()
+                        : TOURNAMENT.DISCIPLINE_ID.in(disciplineIds))
                 .orderBy(TOURNAMENT.CREATED_DATE.desc());
         return query.fetch(r -> new TournamentDto(
                         r.get(TOURNAMENT.ID),
@@ -79,6 +87,10 @@ public class TournamentService {
                         r.get("type_name_ru", String.class),
                         r.get("type_name_kk", String.class),
                         r.get("type_name_en", String.class),
+                        r.get(TOURNAMENT.DISCIPLINE_ID),
+                        r.get("discipline_name_ru", String.class),
+                        r.get("discipline_name_kk", String.class),
+                        r.get("discipline_name_en", String.class),
                         r.get(TOURNAMENT.CREATED_DATE),
                         r.get(TOURNAMENT.UPDATED_DATE),
                         r.get(TOURNAMENT.FORMAT),
@@ -104,6 +116,10 @@ public class TournamentService {
                         D_TOURNAMENT_TYPE.NAME_RU.as("type_name_ru"),
                         D_TOURNAMENT_TYPE.NAME_KK.as("type_name_kk"),
                         D_TOURNAMENT_TYPE.NAME_EN.as("type_name_en"),
+                        TOURNAMENT.DISCIPLINE_ID,
+                        D_DISCIPLINE.NAME_RU.as("discipline_name_ru"),
+                        D_DISCIPLINE.NAME_KK.as("discipline_name_kk"),
+                        D_DISCIPLINE.NAME_EN.as("discipline_name_en"),
                         TOURNAMENT.CREATED_DATE,
                         TOURNAMENT.UPDATED_DATE,
                         TOURNAMENT.FORMAT,
@@ -113,6 +129,7 @@ public class TournamentService {
                 .from(TOURNAMENT)
                 .leftJoin(D_TOURNAMENT_STATUS).on(TOURNAMENT.TOURNAMENT_STATUS.eq(D_TOURNAMENT_STATUS.ID))
                 .leftJoin(D_TOURNAMENT_TYPE).on(TOURNAMENT.TOURNAMENT_TYPE.eq(D_TOURNAMENT_TYPE.ID))
+                .leftJoin(D_DISCIPLINE).on(TOURNAMENT.DISCIPLINE_ID.eq(D_DISCIPLINE.ID))
                 .where(TOURNAMENT.ID.eq(id))
                 .fetchOptional(r -> new TournamentDto(
                         r.get(TOURNAMENT.ID),
@@ -130,6 +147,10 @@ public class TournamentService {
                         r.get("type_name_ru", String.class),
                         r.get("type_name_kk", String.class),
                         r.get("type_name_en", String.class),
+                        r.get(TOURNAMENT.DISCIPLINE_ID),
+                        r.get("discipline_name_ru", String.class),
+                        r.get("discipline_name_kk", String.class),
+                        r.get("discipline_name_en", String.class),
                         r.get(TOURNAMENT.CREATED_DATE),
                         r.get(TOURNAMENT.UPDATED_DATE),
                         r.get(TOURNAMENT.FORMAT),
@@ -142,6 +163,7 @@ public class TournamentService {
 
     public TournamentDto create(TournamentRequest req) {
         validateFormat(req.getFormat(), req.getTournamentTypeId());
+        validateDiscipline(req.getDisciplineId());
 
         Long id = dsl.insertInto(TOURNAMENT)
                 .set(TOURNAMENT.NAME, req.getName())
@@ -151,6 +173,7 @@ public class TournamentService {
                 .set(TOURNAMENT.PRIZE_MONEY, req.getPrizeMoney())
                 .set(TOURNAMENT.TOURNAMENT_STATUS, STATUS_UPCOMING)
                 .set(TOURNAMENT.TOURNAMENT_TYPE, req.getTournamentTypeId())
+                .set(TOURNAMENT.DISCIPLINE_ID, req.getDisciplineId())
                 .set(TOURNAMENT.FORMAT, req.getFormat())
                 .set(TOURNAMENT.TOTAL_ROUNDS, req.getTotalRounds())
                 .set(TOURNAMENT.CREATED_DATE, OffsetDateTime.now(ZONE))
@@ -178,6 +201,7 @@ public class TournamentService {
         String effectiveFormat = req.getFormat() != null ? req.getFormat() : existing.getFormat();
         Long effectiveType = req.getTournamentTypeId() != null ? req.getTournamentTypeId() : existing.getTournamentType();
         validateFormat(effectiveFormat, effectiveType);
+        validateDiscipline(req.getDisciplineId());
 
         int updated = dsl.update(TOURNAMENT)
                 .set(TOURNAMENT.NAME, req.getName())
@@ -187,6 +211,7 @@ public class TournamentService {
                 .set(TOURNAMENT.PRIZE_MONEY, req.getPrizeMoney())
                 .set(TOURNAMENT.TOURNAMENT_STATUS, req.getTournamentStatusId())
                 .set(TOURNAMENT.TOURNAMENT_TYPE, req.getTournamentTypeId())
+                .set(TOURNAMENT.DISCIPLINE_ID, req.getDisciplineId())
                 .set(TOURNAMENT.FORMAT, req.getFormat())
                 .set(TOURNAMENT.TOTAL_ROUNDS, req.getTotalRounds())
                 .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now(ZONE))
@@ -261,6 +286,24 @@ public class TournamentService {
                     "eKPL турнир түрі EKPL форматын қолдануы керек",
                     "Тип турнира eKPL должен использовать формат EKPL",
                     "Tournament type eKPL must use EKPL format");
+        }
+    }
+
+    private void validateDiscipline(Long disciplineId) {
+        if (disciplineId == null) {
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Дисциплина міндетті түрде көрсетілуі керек",
+                    "Дисциплина обязательна для заполнения",
+                    "Discipline is required");
+        }
+        boolean exists = dsl.fetchExists(dsl.selectFrom(D_DISCIPLINE)
+                .where(D_DISCIPLINE.ID.eq(disciplineId))
+                .and(D_DISCIPLINE.IS_ACTIVE.isTrue()));
+        if (!exists) {
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Жарамсыз дисциплина",
+                    "Неверная дисциплина",
+                    "Invalid discipline");
         }
     }
 

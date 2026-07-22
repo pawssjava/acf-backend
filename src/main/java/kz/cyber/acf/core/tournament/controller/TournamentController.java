@@ -24,11 +24,12 @@ public class TournamentController {
 
     private final TournamentService tournamentService;
 
-    @Operation(summary = "List all tournaments", description = "Returns all tournaments ordered by creation date descending, with status and type names resolved. Optionally filter by tournament_type_id.")
+    @Operation(summary = "List all tournaments", description = "Returns all tournaments ordered by creation date descending, with status, type and discipline names resolved. Optionally filter by tournament_type_id and/or one or more discipline_ids.")
     @GetMapping
     public List<TournamentDto> findAll(
-            @Parameter(description = "Filter by tournament type ID") @RequestParam(required = false) Long tournamentTypeId) {
-        return tournamentService.findAll(tournamentTypeId);
+            @Parameter(description = "Filter by tournament type ID") @RequestParam(required = false) Long tournamentTypeId,
+            @Parameter(description = "Filter by one or more discipline IDs") @RequestParam(required = false) List<Long> disciplineIds) {
+        return tournamentService.findAll(tournamentTypeId, disciplineIds);
     }
 
     @Operation(
@@ -45,7 +46,7 @@ public class TournamentController {
 
     @Operation(
             summary = "Create tournament",
-            description = "Creates a new tournament. `tournamentStatusId` and `tournamentTypeId` must reference existing dictionary entries.",
+            description = "Creates a new tournament. `tournamentStatusId`, `tournamentTypeId` and `disciplineId` must reference existing dictionary entries. `disciplineId` is required (see GET /api/dictionary/disciplines).",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Tournament created")
             }

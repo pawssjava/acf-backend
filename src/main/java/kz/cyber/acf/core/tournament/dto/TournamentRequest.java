@@ -14,6 +14,7 @@ public class TournamentRequest {
     private BigDecimal prizeMoney;
     private Long tournamentStatusId;
     private Long tournamentTypeId;
+    private Long disciplineId;
     private String format;
     private Integer totalRounds;
 }

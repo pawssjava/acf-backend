@@ -6,6 +6,7 @@ package group.bi.postsales.database;
 
 import group.bi.postsales.database.tables.DCity;
 import group.bi.postsales.database.tables.DClub;
+import group.bi.postsales.database.tables.DDiscipline;
 import group.bi.postsales.database.tables.DTournamentStatus;
 import group.bi.postsales.database.tables.DTournamentType;
 import group.bi.postsales.database.tables.EducationMaterial;
@@ -36,6 +37,11 @@ public class Tables {
      * The table <code>acf.d_club</code>.
      */
     public static final DClub D_CLUB = DClub.D_CLUB;
+
+    /**
+     * The table <code>acf.d_discipline</code>.
+     */
+    public static final DDiscipline D_DISCIPLINE = DDiscipline.D_DISCIPLINE;
 
     /**
      * The table <code>acf.d_tournament_status</code>.

@@ -218,6 +218,20 @@ public class TournamentRecord extends UpdatableRecordImpl<TournamentRecord> {
         return (OffsetDateTime) get(13);
     }
 
+    /**
+     * Setter for <code>acf.tournament.discipline_id</code>.
+     */
+    public void setDisciplineId(Long value) {
+        set(14, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.discipline_id</code>.
+     */
+    public Long getDisciplineId() {
+        return (Long) get(14);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -241,7 +255,7 @@ public class TournamentRecord extends UpdatableRecordImpl<TournamentRecord> {
     /**
      * Create a detached, initialised TournamentRecord
      */
-    public TournamentRecord(Long id, String name, String logo, LocalDate startDate, LocalDate endDate, Integer capacity, BigDecimal prizeMoney, Long tournamentStatus, Long tournamentType, String format, String phase, Integer totalRounds, OffsetDateTime updatedDate, OffsetDateTime createdDate) {
+    public TournamentRecord(Long id, String name, String logo, LocalDate startDate, LocalDate endDate, Integer capacity, BigDecimal prizeMoney, Long tournamentStatus, Long tournamentType, String format, String phase, Integer totalRounds, OffsetDateTime updatedDate, OffsetDateTime createdDate, Long disciplineId) {
         super(Tournament.TOURNAMENT);
 
         setId(id);
@@ -258,6 +272,7 @@ public class TournamentRecord extends UpdatableRecordImpl<TournamentRecord> {
         setTotalRounds(totalRounds);
         setUpdatedDate(updatedDate);
         setCreatedDate(createdDate);
+        setDisciplineId(disciplineId);
         resetTouchedOnNotNull();
     }
 }

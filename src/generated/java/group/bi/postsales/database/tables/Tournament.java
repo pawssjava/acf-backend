@@ -5,17 +5,21 @@ package group.bi.postsales.database.tables;
 
 
 import group.bi.postsales.database.Acf;
+import group.bi.postsales.database.Indexes;
 import group.bi.postsales.database.Keys;
 import group.bi.postsales.database.tables.records.TournamentRecord;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Identity;
+import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
@@ -123,6 +127,11 @@ public class Tournament extends TableImpl<TournamentRecord> {
      */
     public final TableField<TournamentRecord, OffsetDateTime> CREATED_DATE = createField(DSL.name("created_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
+    /**
+     * The column <code>acf.tournament.discipline_id</code>.
+     */
+    public final TableField<TournamentRecord, Long> DISCIPLINE_ID = createField(DSL.name("discipline_id"), SQLDataType.BIGINT, this, "");
+
     private Tournament(Name alias, Table<TournamentRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -155,6 +164,11 @@ public class Tournament extends TableImpl<TournamentRecord> {
     @Override
     public Schema getSchema() {
         return aliased() ? null : Acf.ACF;
+    }
+
+    @Override
+    public List<Index> getIndexes() {
+        return Arrays.asList(Indexes.IDX_TOURNAMENT_DISCIPLINE);
     }
 
     @Override

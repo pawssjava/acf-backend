@@ -27,6 +27,10 @@ public class TournamentDto {
     private String tournamentTypeNameRu;
     private String tournamentTypeNameKk;
     private String tournamentTypeNameEn;
+    private Long disciplineId;
+    private String disciplineNameRu;
+    private String disciplineNameKk;
+    private String disciplineNameEn;
     private OffsetDateTime createdDate;
     private OffsetDateTime updatedDate;
     private String format;
