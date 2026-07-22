@@ -36,4 +36,6 @@ public class TournamentDto {
     private String format;
     private String phase;
     private Integer totalRounds;
+    private boolean archived;
+    private OffsetDateTime archivedDate;
 }

@@ -2,11 +2,13 @@ package kz.cyber.acf.core.tournament.service;
 
 import kz.cyber.acf.core.tournament.dto.TournamentDto;
 import kz.cyber.acf.core.tournament.dto.TournamentRequest;
+import kz.cyber.acf.core.user.service.UserService;
 import kz.cyber.acf.storage.MinioService;
 import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
 import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,8 +34,9 @@ public class TournamentService {
 
     private final DefaultDSLContext dsl;
     private final MinioService minioService;
+    private final UserService userService;
 
-    public List<TournamentDto> findAll(Long tournamentTypeId, List<Long> disciplineIds) {
+    public List<TournamentDto> findAll(Long tournamentTypeId, List<Long> disciplineIds, boolean archived) {
         var query = dsl.select(
                         TOURNAMENT.ID,
                         TOURNAMENT.NAME,
@@ -58,48 +61,35 @@ public class TournamentService {
                         TOURNAMENT.UPDATED_DATE,
                         TOURNAMENT.FORMAT,
                         TOURNAMENT.PHASE,
-                        TOURNAMENT.TOTAL_ROUNDS
+                        TOURNAMENT.TOTAL_ROUNDS,
+                        TOURNAMENT.IS_ARCHIVED,
+                        TOURNAMENT.ARCHIVED_DATE
                 )
                 .from(TOURNAMENT)
                 .leftJoin(D_TOURNAMENT_STATUS).on(TOURNAMENT.TOURNAMENT_STATUS.eq(D_TOURNAMENT_STATUS.ID))
                 .leftJoin(D_TOURNAMENT_TYPE).on(TOURNAMENT.TOURNAMENT_TYPE.eq(D_TOURNAMENT_TYPE.ID))
                 .leftJoin(D_DISCIPLINE).on(TOURNAMENT.DISCIPLINE_ID.eq(D_DISCIPLINE.ID))
-                .where(tournamentTypeId == null
+                .where(TOURNAMENT.IS_ARCHIVED.eq(archived))
+                .and(tournamentTypeId == null
                         ? org.jooq.impl.DSL.noCondition()
                         : TOURNAMENT.TOURNAMENT_TYPE.eq(tournamentTypeId))
                 .and(disciplineIds == null || disciplineIds.isEmpty()
                         ? org.jooq.impl.DSL.noCondition()
                         : TOURNAMENT.DISCIPLINE_ID.in(disciplineIds))
                 .orderBy(TOURNAMENT.CREATED_DATE.desc());
-        return query.fetch(r -> new TournamentDto(
-                        r.get(TOURNAMENT.ID),
-                        r.get(TOURNAMENT.NAME),
-                        resolveUrl(r.get(TOURNAMENT.LOGO)),
-                        r.get(TOURNAMENT.START_DATE),
-                        r.get(TOURNAMENT.END_DATE),
-                        r.get(TOURNAMENT.CAPACITY),
-                        r.get(TOURNAMENT.PRIZE_MONEY),
-                        r.get(TOURNAMENT.TOURNAMENT_STATUS),
-                        r.get("status_name_ru", String.class),
-                        r.get("status_name_kk", String.class),
-                        r.get("status_name_en", String.class),
-                        r.get(TOURNAMENT.TOURNAMENT_TYPE),
-                        r.get("type_name_ru", String.class),
-                        r.get("type_name_kk", String.class),
-                        r.get("type_name_en", String.class),
-                        r.get(TOURNAMENT.DISCIPLINE_ID),
-                        r.get("discipline_name_ru", String.class),
-                        r.get("discipline_name_kk", String.class),
-                        r.get("discipline_name_en", String.class),
-                        r.get(TOURNAMENT.CREATED_DATE),
-                        r.get(TOURNAMENT.UPDATED_DATE),
-                        r.get(TOURNAMENT.FORMAT),
-                        r.get(TOURNAMENT.PHASE),
-                        r.get(TOURNAMENT.TOTAL_ROUNDS)
-                ));
+        return query.fetch(this::toDto);
     }
 
-    public TournamentDto findById(Long id) {
+    public TournamentDto findById(Long id, Jwt jwt) {
+        TournamentDto dto = findByIdRaw(id);
+        if (dto.isArchived() && !userService.isAdmin(jwt)) {
+            throw new AppException(HttpStatus.NOT_FOUND,
+                    "Турнир табылмады", "Турнир не найден", "Tournament not found");
+        }
+        return dto;
+    }
+
+    private TournamentDto findByIdRaw(Long id) {
         return dsl.select(
                         TOURNAMENT.ID,
                         TOURNAMENT.NAME,
@@ -124,41 +114,49 @@ public class TournamentService {
                         TOURNAMENT.UPDATED_DATE,
                         TOURNAMENT.FORMAT,
                         TOURNAMENT.PHASE,
-                        TOURNAMENT.TOTAL_ROUNDS
+                        TOURNAMENT.TOTAL_ROUNDS,
+                        TOURNAMENT.IS_ARCHIVED,
+                        TOURNAMENT.ARCHIVED_DATE
                 )
                 .from(TOURNAMENT)
                 .leftJoin(D_TOURNAMENT_STATUS).on(TOURNAMENT.TOURNAMENT_STATUS.eq(D_TOURNAMENT_STATUS.ID))
                 .leftJoin(D_TOURNAMENT_TYPE).on(TOURNAMENT.TOURNAMENT_TYPE.eq(D_TOURNAMENT_TYPE.ID))
                 .leftJoin(D_DISCIPLINE).on(TOURNAMENT.DISCIPLINE_ID.eq(D_DISCIPLINE.ID))
                 .where(TOURNAMENT.ID.eq(id))
-                .fetchOptional(r -> new TournamentDto(
-                        r.get(TOURNAMENT.ID),
-                        r.get(TOURNAMENT.NAME),
-                        resolveUrl(r.get(TOURNAMENT.LOGO)),
-                        r.get(TOURNAMENT.START_DATE),
-                        r.get(TOURNAMENT.END_DATE),
-                        r.get(TOURNAMENT.CAPACITY),
-                        r.get(TOURNAMENT.PRIZE_MONEY),
-                        r.get(TOURNAMENT.TOURNAMENT_STATUS),
-                        r.get("status_name_ru", String.class),
-                        r.get("status_name_kk", String.class),
-                        r.get("status_name_en", String.class),
-                        r.get(TOURNAMENT.TOURNAMENT_TYPE),
-                        r.get("type_name_ru", String.class),
-                        r.get("type_name_kk", String.class),
-                        r.get("type_name_en", String.class),
-                        r.get(TOURNAMENT.DISCIPLINE_ID),
-                        r.get("discipline_name_ru", String.class),
-                        r.get("discipline_name_kk", String.class),
-                        r.get("discipline_name_en", String.class),
-                        r.get(TOURNAMENT.CREATED_DATE),
-                        r.get(TOURNAMENT.UPDATED_DATE),
-                        r.get(TOURNAMENT.FORMAT),
-                        r.get(TOURNAMENT.PHASE),
-                        r.get(TOURNAMENT.TOTAL_ROUNDS)
-                ))
+                .fetchOptional(this::toDto)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND,
                         "Турнир табылмады", "Турнир не найден", "Tournament not found"));
+    }
+
+    private TournamentDto toDto(org.jooq.Record r) {
+        return new TournamentDto(
+                r.get(TOURNAMENT.ID),
+                r.get(TOURNAMENT.NAME),
+                resolveUrl(r.get(TOURNAMENT.LOGO)),
+                r.get(TOURNAMENT.START_DATE),
+                r.get(TOURNAMENT.END_DATE),
+                r.get(TOURNAMENT.CAPACITY),
+                r.get(TOURNAMENT.PRIZE_MONEY),
+                r.get(TOURNAMENT.TOURNAMENT_STATUS),
+                r.get("status_name_ru", String.class),
+                r.get("status_name_kk", String.class),
+                r.get("status_name_en", String.class),
+                r.get(TOURNAMENT.TOURNAMENT_TYPE),
+                r.get("type_name_ru", String.class),
+                r.get("type_name_kk", String.class),
+                r.get("type_name_en", String.class),
+                r.get(TOURNAMENT.DISCIPLINE_ID),
+                r.get("discipline_name_ru", String.class),
+                r.get("discipline_name_kk", String.class),
+                r.get("discipline_name_en", String.class),
+                r.get(TOURNAMENT.CREATED_DATE),
+                r.get(TOURNAMENT.UPDATED_DATE),
+                r.get(TOURNAMENT.FORMAT),
+                r.get(TOURNAMENT.PHASE),
+                r.get(TOURNAMENT.TOTAL_ROUNDS),
+                Boolean.TRUE.equals(r.get(TOURNAMENT.IS_ARCHIVED)),
+                r.get(TOURNAMENT.ARCHIVED_DATE)
+        );
     }
 
     public TournamentDto create(TournamentRequest req) {
@@ -180,10 +178,11 @@ public class TournamentService {
                 .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now(ZONE))
                 .returning(TOURNAMENT.ID)
                 .fetchOne(TOURNAMENT.ID);
-        return findById(id);
+        return findByIdRaw(id);
     }
 
-    public TournamentDto update(Long id, TournamentRequest req) {
+    public TournamentDto update(Long id, TournamentRequest req, Jwt jwt) {
+        userService.requireAdmin(jwt);
         var existing = dsl.selectFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(id)).fetchOne();
         if (existing == null) throw new AppException(HttpStatus.NOT_FOUND,
                 "Турнир табылмады", "Турнир не найден", "Tournament not found");
@@ -220,7 +219,7 @@ public class TournamentService {
 
         if (updated == 0) throw new AppException(HttpStatus.NOT_FOUND,
                 "Турнир табылмады", "Турнир не найден", "Tournament not found");
-        return findById(id);
+        return findByIdRaw(id);
     }
 
     public TournamentDto uploadLogo(Long id, MultipartFile file) {
@@ -234,7 +233,33 @@ public class TournamentService {
                 .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now(ZONE))
                 .where(TOURNAMENT.ID.eq(id))
                 .execute();
-        return findById(id);
+        return findByIdRaw(id);
+    }
+
+    public TournamentDto archive(Long id, Jwt jwt) {
+        userService.requireAdmin(jwt);
+        int updated = dsl.update(TOURNAMENT)
+                .set(TOURNAMENT.IS_ARCHIVED, true)
+                .set(TOURNAMENT.ARCHIVED_DATE, OffsetDateTime.now(ZONE))
+                .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now(ZONE))
+                .where(TOURNAMENT.ID.eq(id))
+                .execute();
+        if (updated == 0) throw new AppException(HttpStatus.NOT_FOUND,
+                "Турнир табылмады", "Турнир не найден", "Tournament not found");
+        return findByIdRaw(id);
+    }
+
+    public TournamentDto restore(Long id, Jwt jwt) {
+        userService.requireAdmin(jwt);
+        int updated = dsl.update(TOURNAMENT)
+                .set(TOURNAMENT.IS_ARCHIVED, false)
+                .setNull(TOURNAMENT.ARCHIVED_DATE)
+                .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now(ZONE))
+                .where(TOURNAMENT.ID.eq(id))
+                .execute();
+        if (updated == 0) throw new AppException(HttpStatus.NOT_FOUND,
+                "Турнир табылмады", "Турнир не найден", "Tournament not found");
+        return findByIdRaw(id);
     }
 
     public void activateTournament(Long id) {
@@ -253,7 +278,8 @@ public class TournamentService {
                 .execute();
     }
 
-    public void delete(Long id) {
+    public void delete(Long id, Jwt jwt) {
+        userService.requireAdmin(jwt);
         int deleted = dsl.deleteFrom(TOURNAMENT).where(TOURNAMENT.ID.eq(id)).execute();
         if (deleted == 0) throw new AppException(HttpStatus.NOT_FOUND,
                 "Турнир табылмады", "Турнир не найден", "Tournament not found");

@@ -16,4 +16,6 @@ public class NewsDto {
     private String image;
     private OffsetDateTime createdDate;
     private OffsetDateTime updatedDate;
+    private boolean archived;
+    private OffsetDateTime archivedDate;
 }

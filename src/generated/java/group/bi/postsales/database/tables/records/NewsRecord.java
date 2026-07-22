@@ -104,6 +104,34 @@ public class NewsRecord extends UpdatableRecordImpl<NewsRecord> {
         return (OffsetDateTime) get(5);
     }
 
+    /**
+     * Setter for <code>acf.news.is_archived</code>.
+     */
+    public void setIsArchived(Boolean value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>acf.news.is_archived</code>.
+     */
+    public Boolean getIsArchived() {
+        return (Boolean) get(6);
+    }
+
+    /**
+     * Setter for <code>acf.news.archived_date</code>.
+     */
+    public void setArchivedDate(OffsetDateTime value) {
+        set(7, value);
+    }
+
+    /**
+     * Getter for <code>acf.news.archived_date</code>.
+     */
+    public OffsetDateTime getArchivedDate() {
+        return (OffsetDateTime) get(7);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -127,7 +155,7 @@ public class NewsRecord extends UpdatableRecordImpl<NewsRecord> {
     /**
      * Create a detached, initialised NewsRecord
      */
-    public NewsRecord(Long id, String title, String description, String image, OffsetDateTime updatedDate, OffsetDateTime createdDate) {
+    public NewsRecord(Long id, String title, String description, String image, OffsetDateTime updatedDate, OffsetDateTime createdDate, Boolean isArchived, OffsetDateTime archivedDate) {
         super(News.NEWS);
 
         setId(id);
@@ -136,6 +164,8 @@ public class NewsRecord extends UpdatableRecordImpl<NewsRecord> {
         setImage(image);
         setUpdatedDate(updatedDate);
         setCreatedDate(createdDate);
+        setIsArchived(isArchived);
+        setArchivedDate(archivedDate);
         resetTouchedOnNotNull();
     }
 }

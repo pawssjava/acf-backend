@@ -5,15 +5,19 @@ package group.bi.postsales.database.tables;
 
 
 import group.bi.postsales.database.Acf;
+import group.bi.postsales.database.Indexes;
 import group.bi.postsales.database.Keys;
 import group.bi.postsales.database.tables.records.NewsRecord;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Identity;
+import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
@@ -81,6 +85,16 @@ public class News extends TableImpl<NewsRecord> {
      */
     public final TableField<NewsRecord, OffsetDateTime> CREATED_DATE = createField(DSL.name("created_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
+    /**
+     * The column <code>acf.news.is_archived</code>.
+     */
+    public final TableField<NewsRecord, Boolean> IS_ARCHIVED = createField(DSL.name("is_archived"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>acf.news.archived_date</code>.
+     */
+    public final TableField<NewsRecord, OffsetDateTime> ARCHIVED_DATE = createField(DSL.name("archived_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+
     private News(Name alias, Table<NewsRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -113,6 +127,11 @@ public class News extends TableImpl<NewsRecord> {
     @Override
     public Schema getSchema() {
         return aliased() ? null : Acf.ACF;
+    }
+
+    @Override
+    public List<Index> getIndexes() {
+        return Arrays.asList(Indexes.IDX_NEWS_IS_ARCHIVED);
     }
 
     @Override

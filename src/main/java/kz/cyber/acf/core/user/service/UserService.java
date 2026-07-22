@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.impl.DefaultDSLContext;
 import kz.cyber.acf.config.AppException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -118,16 +119,33 @@ public class UserService {
     }
 
     public void requireAdmin(String username) {
-        Boolean isAdmin = dsl.select(USER.IS_ADMIN)
-                .from(USER)
-                .where(USER.USERNAME.eq(username))
-                .fetchOneInto(Boolean.class);
-        if (!Boolean.TRUE.equals(isAdmin)) {
+        if (!isAdminUsername(username)) {
             throw new AppException(HttpStatus.FORBIDDEN,
                     "Администратор рұқсаты қажет",
                     "Требуется доступ администратора",
                     "Admin access required");
         }
+    }
+
+    public void requireAdmin(Jwt jwt) {
+        if (!isAdmin(jwt)) {
+            throw new AppException(HttpStatus.FORBIDDEN,
+                    "Администратор рұқсаты қажет",
+                    "Требуется доступ администратора",
+                    "Admin access required");
+        }
+    }
+
+    public boolean isAdmin(Jwt jwt) {
+        return jwt != null && isAdminUsername(jwt.getClaimAsString("preferred_username"));
+    }
+
+    private boolean isAdminUsername(String username) {
+        Boolean isAdmin = dsl.select(USER.IS_ADMIN)
+                .from(USER)
+                .where(USER.USERNAME.eq(username))
+                .fetchOneInto(Boolean.class);
+        return Boolean.TRUE.equals(isAdmin);
     }
 
     public void delete(Long id) {

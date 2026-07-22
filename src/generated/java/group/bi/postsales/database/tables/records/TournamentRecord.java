@@ -232,6 +232,34 @@ public class TournamentRecord extends UpdatableRecordImpl<TournamentRecord> {
         return (Long) get(14);
     }
 
+    /**
+     * Setter for <code>acf.tournament.is_archived</code>.
+     */
+    public void setIsArchived(Boolean value) {
+        set(15, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.is_archived</code>.
+     */
+    public Boolean getIsArchived() {
+        return (Boolean) get(15);
+    }
+
+    /**
+     * Setter for <code>acf.tournament.archived_date</code>.
+     */
+    public void setArchivedDate(OffsetDateTime value) {
+        set(16, value);
+    }
+
+    /**
+     * Getter for <code>acf.tournament.archived_date</code>.
+     */
+    public OffsetDateTime getArchivedDate() {
+        return (OffsetDateTime) get(16);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -255,7 +283,7 @@ public class TournamentRecord extends UpdatableRecordImpl<TournamentRecord> {
     /**
      * Create a detached, initialised TournamentRecord
      */
-    public TournamentRecord(Long id, String name, String logo, LocalDate startDate, LocalDate endDate, Integer capacity, BigDecimal prizeMoney, Long tournamentStatus, Long tournamentType, String format, String phase, Integer totalRounds, OffsetDateTime updatedDate, OffsetDateTime createdDate, Long disciplineId) {
+    public TournamentRecord(Long id, String name, String logo, LocalDate startDate, LocalDate endDate, Integer capacity, BigDecimal prizeMoney, Long tournamentStatus, Long tournamentType, String format, String phase, Integer totalRounds, OffsetDateTime updatedDate, OffsetDateTime createdDate, Long disciplineId, Boolean isArchived, OffsetDateTime archivedDate) {
         super(Tournament.TOURNAMENT);
 
         setId(id);
@@ -273,6 +301,8 @@ public class TournamentRecord extends UpdatableRecordImpl<TournamentRecord> {
         setUpdatedDate(updatedDate);
         setCreatedDate(createdDate);
         setDisciplineId(disciplineId);
+        setIsArchived(isArchived);
+        setArchivedDate(archivedDate);
         resetTouchedOnNotNull();
     }
 }

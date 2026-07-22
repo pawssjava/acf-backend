@@ -6,6 +6,7 @@ package group.bi.postsales.database;
 
 import group.bi.postsales.database.tables.EducationMaterial;
 import group.bi.postsales.database.tables.FlywaySchemaHistory;
+import group.bi.postsales.database.tables.News;
 import group.bi.postsales.database.tables.SmsLog;
 import group.bi.postsales.database.tables.Tournament;
 import group.bi.postsales.database.tables.TournamentRegistrationLog;
@@ -28,7 +29,9 @@ public class Indexes {
 
     public static final Index FLYWAY_SCHEMA_HISTORY_S_IDX = Internal.createIndex(DSL.name("flyway_schema_history_s_idx"), FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, new OrderField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.SUCCESS }, false);
     public static final Index IDX_EDUCATION_MATERIAL_CATEGORY = Internal.createIndex(DSL.name("idx_education_material_category"), EducationMaterial.EDUCATION_MATERIAL, new OrderField[] { EducationMaterial.EDUCATION_MATERIAL.CATEGORY }, false);
+    public static final Index IDX_NEWS_IS_ARCHIVED = Internal.createIndex(DSL.name("idx_news_is_archived"), News.NEWS, new OrderField[] { News.NEWS.IS_ARCHIVED }, false);
     public static final Index IDX_REG_LOG_TOURNAMENT_DATE = Internal.createIndex(DSL.name("idx_reg_log_tournament_date"), TournamentRegistrationLog.TOURNAMENT_REGISTRATION_LOG, new OrderField[] { TournamentRegistrationLog.TOURNAMENT_REGISTRATION_LOG.TOURNAMENT_ID, TournamentRegistrationLog.TOURNAMENT_REGISTRATION_LOG.CREATED_DATE.desc() }, false);
     public static final Index IDX_SMS_LOG_PHONE_SENT = Internal.createIndex(DSL.name("idx_sms_log_phone_sent"), SmsLog.SMS_LOG, new OrderField[] { SmsLog.SMS_LOG.PHONE_NUMBER, SmsLog.SMS_LOG.SENT_AT.desc() }, false);
     public static final Index IDX_TOURNAMENT_DISCIPLINE = Internal.createIndex(DSL.name("idx_tournament_discipline"), Tournament.TOURNAMENT, new OrderField[] { Tournament.TOURNAMENT.DISCIPLINE_ID }, false);
+    public static final Index IDX_TOURNAMENT_IS_ARCHIVED = Internal.createIndex(DSL.name("idx_tournament_is_archived"), Tournament.TOURNAMENT, new OrderField[] { Tournament.TOURNAMENT.IS_ARCHIVED }, false);
 }

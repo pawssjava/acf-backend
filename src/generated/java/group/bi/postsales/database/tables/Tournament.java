@@ -132,6 +132,16 @@ public class Tournament extends TableImpl<TournamentRecord> {
      */
     public final TableField<TournamentRecord, Long> DISCIPLINE_ID = createField(DSL.name("discipline_id"), SQLDataType.BIGINT, this, "");
 
+    /**
+     * The column <code>acf.tournament.is_archived</code>.
+     */
+    public final TableField<TournamentRecord, Boolean> IS_ARCHIVED = createField(DSL.name("is_archived"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>acf.tournament.archived_date</code>.
+     */
+    public final TableField<TournamentRecord, OffsetDateTime> ARCHIVED_DATE = createField(DSL.name("archived_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+
     private Tournament(Name alias, Table<TournamentRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -168,7 +178,7 @@ public class Tournament extends TableImpl<TournamentRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.IDX_TOURNAMENT_DISCIPLINE);
+        return Arrays.asList(Indexes.IDX_TOURNAMENT_DISCIPLINE, Indexes.IDX_TOURNAMENT_IS_ARCHIVED);
     }
 
     @Override
