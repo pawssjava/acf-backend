@@ -17,4 +17,5 @@ public class TournamentRequest {
     private Long disciplineId;
     private String format;
     private Integer totalRounds;
+    private String description;
 }

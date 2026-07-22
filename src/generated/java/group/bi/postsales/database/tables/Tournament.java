@@ -142,6 +142,11 @@ public class Tournament extends TableImpl<TournamentRecord> {
      */
     public final TableField<TournamentRecord, OffsetDateTime> ARCHIVED_DATE = createField(DSL.name("archived_date"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
+    /**
+     * The column <code>acf.tournament.description</code>.
+     */
+    public final TableField<TournamentRecord, String> DESCRIPTION = createField(DSL.name("description"), SQLDataType.CLOB, this, "");
+
     private Tournament(Name alias, Table<TournamentRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

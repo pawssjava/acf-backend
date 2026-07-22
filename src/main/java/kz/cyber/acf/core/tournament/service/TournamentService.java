@@ -1,5 +1,6 @@
 package kz.cyber.acf.core.tournament.service;
 
+import group.bi.postsales.database.tables.records.TournamentRecord;
 import kz.cyber.acf.core.tournament.dto.TournamentDto;
 import kz.cyber.acf.core.tournament.dto.TournamentRequest;
 import kz.cyber.acf.core.user.service.UserService;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static group.bi.postsales.database.Tables.*;
@@ -63,7 +65,8 @@ public class TournamentService {
                         TOURNAMENT.PHASE,
                         TOURNAMENT.TOTAL_ROUNDS,
                         TOURNAMENT.IS_ARCHIVED,
-                        TOURNAMENT.ARCHIVED_DATE
+                        TOURNAMENT.ARCHIVED_DATE,
+                        TOURNAMENT.DESCRIPTION
                 )
                 .from(TOURNAMENT)
                 .leftJoin(D_TOURNAMENT_STATUS).on(TOURNAMENT.TOURNAMENT_STATUS.eq(D_TOURNAMENT_STATUS.ID))
@@ -116,7 +119,8 @@ public class TournamentService {
                         TOURNAMENT.PHASE,
                         TOURNAMENT.TOTAL_ROUNDS,
                         TOURNAMENT.IS_ARCHIVED,
-                        TOURNAMENT.ARCHIVED_DATE
+                        TOURNAMENT.ARCHIVED_DATE,
+                        TOURNAMENT.DESCRIPTION
                 )
                 .from(TOURNAMENT)
                 .leftJoin(D_TOURNAMENT_STATUS).on(TOURNAMENT.TOURNAMENT_STATUS.eq(D_TOURNAMENT_STATUS.ID))
@@ -155,7 +159,8 @@ public class TournamentService {
                 r.get(TOURNAMENT.PHASE),
                 r.get(TOURNAMENT.TOTAL_ROUNDS),
                 Boolean.TRUE.equals(r.get(TOURNAMENT.IS_ARCHIVED)),
-                r.get(TOURNAMENT.ARCHIVED_DATE)
+                r.get(TOURNAMENT.ARCHIVED_DATE),
+                r.get(TOURNAMENT.DESCRIPTION)
         );
     }
 
@@ -174,6 +179,7 @@ public class TournamentService {
                 .set(TOURNAMENT.DISCIPLINE_ID, req.getDisciplineId())
                 .set(TOURNAMENT.FORMAT, req.getFormat())
                 .set(TOURNAMENT.TOTAL_ROUNDS, req.getTotalRounds())
+                .set(TOURNAMENT.DESCRIPTION, req.getDescription())
                 .set(TOURNAMENT.CREATED_DATE, OffsetDateTime.now(ZONE))
                 .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now(ZONE))
                 .returning(TOURNAMENT.ID)
@@ -187,7 +193,9 @@ public class TournamentService {
         if (existing == null) throw new AppException(HttpStatus.NOT_FOUND,
                 "Турнир табылмады", "Турнир не найден", "Tournament not found");
 
-        rejectIfNotEditable(existing.getTournamentStatus());
+        if (lockedFieldsChanged(existing, req)) {
+            rejectIfNotEditable(existing.getTournamentStatus());
+        }
 
         if (existing.getPhase() != null && req.getFormat() != null
                 && !req.getFormat().equals(existing.getFormat())) {
@@ -213,6 +221,7 @@ public class TournamentService {
                 .set(TOURNAMENT.DISCIPLINE_ID, req.getDisciplineId())
                 .set(TOURNAMENT.FORMAT, req.getFormat())
                 .set(TOURNAMENT.TOTAL_ROUNDS, req.getTotalRounds())
+                .set(TOURNAMENT.DESCRIPTION, req.getDescription())
                 .set(TOURNAMENT.UPDATED_DATE, OffsetDateTime.now(ZONE))
                 .where(TOURNAMENT.ID.eq(id))
                 .execute();
@@ -220,6 +229,19 @@ public class TournamentService {
         if (updated == 0) throw new AppException(HttpStatus.NOT_FOUND,
                 "Турнир табылмады", "Турнир не найден", "Tournament not found");
         return findByIdRaw(id);
+    }
+
+    private boolean lockedFieldsChanged(TournamentRecord existing, TournamentRequest req) {
+        return !Objects.equals(req.getName(), existing.getName())
+                || !Objects.equals(req.getStartDate(), existing.getStartDate())
+                || !Objects.equals(req.getEndDate(), existing.getEndDate())
+                || !Objects.equals(req.getCapacity(), existing.getCapacity())
+                || !Objects.equals(req.getPrizeMoney(), existing.getPrizeMoney())
+                || !Objects.equals(req.getTournamentStatusId(), existing.getTournamentStatus())
+                || !Objects.equals(req.getTournamentTypeId(), existing.getTournamentType())
+                || !Objects.equals(req.getDisciplineId(), existing.getDisciplineId())
+                || !Objects.equals(req.getFormat(), existing.getFormat())
+                || !Objects.equals(req.getTotalRounds(), existing.getTotalRounds());
     }
 
     public TournamentDto uploadLogo(Long id, MultipartFile file) {
