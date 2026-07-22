@@ -20,6 +20,7 @@ spring:
       maximum-pool-size: 50
       max-lifetime: 600000
       keepalive-time: 300000
+      idle-timeout: 300000
 
   servlet:
     multipart:
